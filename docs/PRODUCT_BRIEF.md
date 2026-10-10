@@ -2,13 +2,13 @@
 
 ## Working title
 
-**Project Ares: The Long Way Home**
+**Mohashunnyo: A Long Way Home**
 
 Tagline: **Design the mission. Read the planet. Bring them home.**
 
 ## Product thesis
 
-Most educational mission tools either hide the engineering or overwhelm the learner with spreadsheets. Project Ares turns authentic mission trade-offs into a coherent adventure: the spacecraft the player designs becomes the system they must live with.
+Most educational mission tools either hide the engineering or overwhelm the learner with spreadsheets. Mohashunnyo turns authentic mission trade-offs into a coherent adventure: the spacecraft the player designs becomes the system they must live with.
 
 The differentiator is not “a Mars survival game with NASA branding.” It is a playable chain of evidence:
 

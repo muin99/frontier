@@ -1,4 +1,4 @@
-# Project Ares: Mission Design Game
+# Mohashunnyo: A Long Way Home
 
 Working title for a scientifically grounded, 2D mission-design and Mars-exploration game for the **2026 NASA International Space Apps Challenge**.
 

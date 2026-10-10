@@ -4,7 +4,7 @@
 
 The published 2026 summary for **Space Mission Design Game** asks for an interactive game in which participants design, manage, and simulate a complete mission while making engineering decisions, managing limited resources, and seeing how choices affect success. It explicitly mentions objectives, spacecraft, instruments, launch vehicles, budget, power, mass, communications, and orbital constraints.
 
-Project Ares fits this closely. The full October 28 statement remains the authority; this document must be revised against it.
+Mohashunnyo fits this closely. The full October 28 statement remains the authority; this document must be revised against it.
 
 ## Judging lens
 
