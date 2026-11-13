@@ -1,0 +1,8 @@
+tools/godot/
+game/.godot/
+game/assets/**/source.zip
+build/
+*.log
+tools/gamedev-skills/
+__pycache__/
+*.py[cod]

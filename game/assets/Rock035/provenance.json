@@ -1,0 +1,9 @@
+{
+  "provider": "ambientCG",
+  "asset": "Rock035",
+  "source": "https://ambientcg.com/view?id=Rock035",
+  "download": "https://ambientcg.com/get?file=Rock035_1K-JPG.zip",
+  "license": "CC0-1.0",
+  "resolution": "1K",
+  "sha256": "c5e4dbd7d5555734498834c1e09b799ef3d1f00c61fe08c0d953b93a8fb1bb95"
+}

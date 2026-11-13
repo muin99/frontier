@@ -1,0 +1,7 @@
+{
+  "source": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/Space%20Exploration%20Vehicle/Space%20Exploration%20Vehicle.glb",
+  "sourceSha256": "09dcfbd45a475440de4ca2405fe3be4f784dee6f12e752bad5faa9f6db6c4a8d",
+  "derivativeSha256": "9e402e3bceea2e1d36ffff27342adfe66c5f38ecf72a38d2261a35a49824b332",
+  "triangles": 413198,
+  "adaptation": "Draco decompressed; source textures retained; runtime scale/feet normalization. NASA concept vehicle, not certified Mars hardware. Arcade movement/collision proxy, not wheel physics."
+}

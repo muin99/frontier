@@ -1,0 +1,38 @@
+[
+  {
+    "asset": "mh_3183",
+    "url": "https://raw.githubusercontent.com/MMWilliams/char-kit/master/characters/mh_3183.glb",
+    "sha256": "d2e11b30f9c2897172b758fd823cd2e92337eaa46f0a1fed86ed72ccd857049c",
+    "license": "CC0-1.0 per upstream MakeHuman asset statement"
+  },
+  {
+    "asset": "mh_3122",
+    "url": "https://raw.githubusercontent.com/MMWilliams/char-kit/master/characters/mh_3122.glb",
+    "sha256": "cfbb0e51d626f28251e136fbcf899bb8ad0c2323b1f048f0cdbf4cfbf2c76cf3",
+    "license": "CC0-1.0 per upstream MakeHuman asset statement"
+  },
+  {
+    "asset": "mh_3427",
+    "url": "https://raw.githubusercontent.com/MMWilliams/char-kit/master/characters/mh_3427.glb",
+    "sha256": "4f4e6285933abf3958e4228054d3e75b6f48814ff29115dbd829b92ec3ccb932",
+    "license": "CC0-1.0 per upstream MakeHuman asset statement"
+  },
+  {
+    "asset": "mh_3305",
+    "url": "https://raw.githubusercontent.com/MMWilliams/char-kit/master/characters/mh_3305.glb",
+    "sha256": "fc5c11142946c8f9b1cd6a4761bc52e447ed3465325deb3e270417c1ed7bc114",
+    "license": "CC0-1.0 per upstream MakeHuman asset statement"
+  },
+  {
+    "asset": "mh_3488",
+    "url": "https://raw.githubusercontent.com/MMWilliams/char-kit/master/characters/mh_3488.glb",
+    "sha256": "272a6574bb08f00adf3ac7799d59751008850717e0ab6e654c73ef25e4177e6d",
+    "license": "CC0-1.0 per upstream MakeHuman asset statement"
+  },
+  {
+    "asset": "mh_1037",
+    "url": "https://raw.githubusercontent.com/MMWilliams/char-kit/master/characters/mh_1037.glb",
+    "sha256": "fea1df1c8458d4ea511617cbc770bece8716df613f44fc7e5077e41feadf7164",
+    "license": "CC0-1.0 per upstream MakeHuman asset statement"
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "creator": "Original procedural composition for Mohashunnyo",
+  "method": "Deterministic additive synthesis, harmonic pads and authored note sequences; no external audio samples",
+  "sampleRate": 24000,
+  "durationSeconds": 64,
+  "files": [
+    "frontier_ambient.wav",
+    "frontier_pressure.wav"
+  ]
+}

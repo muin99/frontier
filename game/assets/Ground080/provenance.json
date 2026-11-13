@@ -1,0 +1,9 @@
+{
+  "provider": "ambientCG",
+  "asset": "Ground080",
+  "source": "https://ambientcg.com/view?id=Ground080",
+  "download": "https://ambientcg.com/get?file=Ground080_1K-JPG.zip",
+  "license": "CC0-1.0",
+  "resolution": "1K",
+  "sha256": "2a615944f0fe8ca943da459c362fff57f7065526f931d610b19026e49f0a7589"
+}

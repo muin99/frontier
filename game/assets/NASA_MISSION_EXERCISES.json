@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "mission": {
+    "title": "ARES PATHFINDER / CREWED MARS SURFACE MISSION",
+    "crew": 4,
+    "surfaceDays": 500,
+    "objective": "Design, validate, and launch a four-person Mars architecture with closed-loop life support, surface power, and oxygen ISRU.",
+    "architectureNote": "The 500-day stay and split cargo/crew context are adapted from NASA Mars DRA 5.0. This game's four-person vehicle, budget, masses, and launch stack are fictional gameplay scenarios."
+  },
+  "exercises": [
+    {"id":"mass_ratio","station":"PROPULSION","title":"Trans-Mars injection mass ratio","prompt":"Scenario burn: Δv = 3,600 m/s, Isp = 350 s, g₀ = 9.80665 m/s². Calculate initial mass / final mass.","equation":"MR = exp(Δv / (Isp × g₀))","unit":"ratio","answer":2.85,"tolerance":0.03,"hint":"Multiply Isp by g₀, divide Δv by that result, then raise e to that power.","sourceTitle":"NASA Glenn — Ideal Rocket Equation","sourceUrl":"https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/ideal-rocket-equation/","evidence":"NASA equation; Δv is a labeled gameplay scenario. NASA Glenn gives 350 s as a reasonable liquid hydrogen/liquid oxygen example."},
+    {"id":"food_energy","station":"HUMAN SYSTEMS","title":"Surface food energy","prompt":"NASA baseline: 3,035 kcal per crewmember-day. For 4 crew over 500 days, calculate total food energy.","equation":"Energy = crew × days × 3,035 kcal","unit":"kcal","answer":6070000,"tolerance":1000,"hint":"Multiply 4 × 500 × 3,035.","sourceTitle":"NASA-STD-3001 Vol. 2 — Food Caloric Content","sourceUrl":"https://www.nasa.gov/reference/7-0-habit-ability-functions-vol-2/","evidence":"NASA-STD-3001 requirement combined with the DRA-inspired 500-day gameplay scenario."},
+    {"id":"comm_latency","station":"FLIGHT OPERATIONS","title":"Mars communication autonomy","prompt":"NASA research cites up to 44 minutes round-trip latency at maximum Earth–Mars distance. Calculate the one-way delay available to a single message.","equation":"One-way delay = round-trip delay ÷ 2","unit":"minutes","answer":22,"tolerance":0.1,"hint":"A round trip contains two equal light-time legs.","sourceTitle":"NASA NTRS 20250000703 — Communication Delay Research","sourceUrl":"https://ntrs.nasa.gov/citations/20250000703","evidence":"Published NASA human-systems research; actual delay changes continuously with planetary geometry."}
+  ]
+}

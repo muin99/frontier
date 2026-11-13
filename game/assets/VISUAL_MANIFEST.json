@@ -1,0 +1,183 @@
+{
+  "version": 5,
+  "engine": "Godot 4.7.2 / OpenGL Compatibility",
+  "display": "1280x720 default window, 1600x900 UI canvas, scalable/fullscreen",
+  "visualDirection": "Detailed concept EVA suit; textured human crew; muted PBR geology; distinct regional silhouettes and changing atmospheric visibility",
+  "assets": [
+    {
+      "id": "explorer_suit",
+      "path": "characters/explorer_z2.glb",
+      "source": "NASA Z2 Spacesuit / official NASA-3D-Resources",
+      "triangles": 30904,
+      "vertices": 50864,
+      "heightMetres": 1.88,
+      "rig": "authored nine-joint weighted skin",
+      "animations": [
+        "idle",
+        "walk",
+        "run"
+      ],
+      "pivot": "feet / Y-up / runtime forward corrected to -Z",
+      "collision": "capsule proxy; wider in rover mode",
+      "lod": "Godot importer generates LODs",
+      "provenance": "characters/Z2_PROVENANCE.json"
+    },
+    {
+      "id": "ground_crew",
+      "paths": [
+        "characters/mh_3183.glb",
+        "characters/mh_3488.glb",
+        "characters/mh_3427.glb",
+        "characters/mh_1037.glb"
+      ],
+      "source": "MMWilliams/char-kit / generated MakeHuman assets",
+      "license": "CC0 per upstream body/asset statement",
+      "rig": "source per-character UE5-named rig and locomotion clips retained",
+      "materials": "embedded diffuse/normal maps, runtime skin/iris/hair tuning",
+      "provenance": "characters/CREW_PROVENANCE.json"
+    },
+    {
+      "id": "rover",
+      "path": "vehicles/sev.glb",
+      "source": "NASA Space Exploration Vehicle concept",
+      "triangles": 413198,
+      "lod": "Godot importer generates LODs",
+      "collision": "simplified wider capsule proxy",
+      "provenance": "vehicles/SEV_PROVENANCE.json"
+    },
+    {
+      "id": "regolith",
+      "path": "Ground080",
+      "source": "ambientCG Ground080",
+      "license": "CC0-1.0",
+      "maps": "1K PBR",
+      "use": "art texture, not NASA surface measurement"
+    },
+    {
+      "id": "geology",
+      "path": "Rock058",
+      "source": "ambientCG Rock058",
+      "license": "CC0-1.0",
+      "maps": "1K PBR, triplanar rock material",
+      "use": "art texture, not NASA surface measurement"
+    },
+    {
+      "id": "local_terrain",
+      "source": "authored generator v2 + NASA PDS MOLA regional base",
+      "grid": "193x193 / 1536 metres",
+      "regions": 6,
+      "discoveries": 40,
+      "collision": "render-matched triangulated surface and off-route geology proxies",
+      "seed": "saved and user-shareable"
+    },
+    {
+      "id": "control_room",
+      "source": "authored Godot geometry",
+      "families": [
+        "console islands",
+        "keyboard decks",
+        "seats",
+        "server bays",
+        "trajectory display",
+        "telemetry wall",
+        "task lighting"
+      ],
+      "collision": "clear route-tested walking aisles"
+    }
+  ],
+  "validation": "Native GPU captures and actual physics traversal; no claim of photorealistic digital humans or validated flight hardware. See docs/ITERATION_05.md.",
+  "iteration6": {
+    "suit": "Full glove arm weights, relaxed shoulder/elbow posture; WebP converted to PNG",
+    "world": "256m streamed synthetic extension; cached triangulated terrain; reusable geological materials",
+    "activities": "Twelve field families; NASA SEV derivative reused for stranded rovers",
+    "network": "Interpolated crew suit and rover instances; shared imported mesh resources"
+  },
+  "iteration7": {
+    "source": "res://scripts/field_hardware.gd",
+    "provenance": "Original authored procedural hard-surface meshes; no third-party art imported for this family",
+    "models": [
+      {
+        "id": "solar",
+        "role": "Photovoltaic wings feed nearby connected equipment. Dust reduces output."
+      },
+      {
+        "id": "battery",
+        "role": "Stores surplus energy and supplies up to 5 power during deficits."
+      },
+      {
+        "id": "reactor",
+        "role": "Reliable concept power source. Tier 3 fabrication; fiction, not certified reactor hardware."
+      },
+      {
+        "id": "coupler",
+        "role": "Extends power connections from 20 to 38 metres. Glowing cables show the grid."
+      },
+      {
+        "id": "oxygen",
+        "role": "Consumes stored water and power to replenish the outpost oxygen reservoir."
+      },
+      {
+        "id": "ice",
+        "role": "Processes recovered raw ice, or extracts beside a surveyed ice deposit in the cold-highland analog. Requires power."
+      },
+      {
+        "id": "habitat",
+        "role": "A powered service zone draws stored oxygen, charges suits and protects against exposure."
+      },
+      {
+        "id": "greenhouse",
+        "role": "Consumes water and power to make rations. Glazed ribs protect the crop trays."
+      },
+      {
+        "id": "fabricator",
+        "role": "Build basic kits from gathered materials. Unlocks industry and survey instruments."
+      },
+      {
+        "id": "refinery",
+        "role": "Processes regolith into structural alloy. Conversion is a game abstraction."
+      },
+      {
+        "id": "cargo",
+        "role": "Adds 100 kg to shared cargo capacity after assembly. Stores the expedition stock."
+      },
+      {
+        "id": "relay",
+        "role": "Links instruments to base within 260m or another linked relay within 360m."
+      },
+      {
+        "id": "weather",
+        "role": "A powered, linked station records one research package per sector."
+      },
+      {
+        "id": "seismic",
+        "role": "Three powered linked anchors at least 20m apart form a seismic research array."
+      },
+      {
+        "id": "spectrometer",
+        "role": "Records a geological district package and unlocks tier 3 after three sectors are explored."
+      },
+      {
+        "id": "observatory",
+        "role": "Linked observations require clear or high-cloud conditions and open sky."
+      },
+      {
+        "id": "dronepad",
+        "role": "Runs a 45-second local mapping sortie and reveals nearby resource sites."
+      },
+      {
+        "id": "beacon",
+        "role": "A persistent lit waypoint with a map marker for route planning."
+      },
+      {
+        "id": "bridge",
+        "role": "A six-metre load-bearing deck for crossing shallow hollows; rotate to align it."
+      },
+      {
+        "id": "ramp",
+        "role": "An inclined four-metre deck for reaching higher surfaces and assembled walkways."
+      }
+    ],
+    "technical": "Metre-scale ground pivots, chamfered housings, profile surfaces, gantries, displays and shared cached meshes; gameplay collision proxies; real 3D shop previews",
+    "review": "Native GPU purchasing captures for solar, oxygen, fabrication and observatory; deployed outpost capture; model construction checks for all 20 types"
+  }
+}

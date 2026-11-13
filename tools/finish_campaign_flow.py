@@ -1,0 +1,15 @@
+from pathlib import Path
+p=Path('game/scripts/expedition.gd');s=p.read_text(encoding='utf-8').replace('campaign.commit(launch_stock,int(Model.LOADOUTS[selected_loadout].cost))','campaign.commit(launch_stock,int(Model.LOADOUTS[selected_loadout].cost),selected_seed)')
+s=s.replace('flight.reset(selected_seed)\n\tregenerate_world','flight.reset(selected_seed)\n\tfield.restore({}); traversal.restore({})\n\tregenerate_world')
+s=s.replace('v.add_child(action("PLAN AN EXPEDITION    →",planning,true))','v.add_child(action("PLAN AN EXPEDITION    →",planning,true))\n\tif campaign.status=="ACTIVE" and not matching_checkpoint(): v.add_child(action("RESUME ACTIVE FLIGHT",resume_active_flight))')
+s=s.replace('elif FileAccess.file_exists(LEGACY_SAVE) or FileAccess.file_exists(LEGACY_SAVE+".bak"): v.add_child(action("IMPORT EARLIER CHECKPOINT",load_checkpoint))','')
+s=s.replace('if not d is Dictionary: continue\n\t\tif d.has','if not d is Dictionary or not d.has("campaign_id"): continue\n\t\tif d.has',1)
+s=s.replace('d.generator_version = 3','d.generator_version = 4').replace('not in [2,3]','not in [4]')
+s=s.replace('v.add_child(text("MOUSE SENSITIVITY",13,MINT))','v.add_child(text("MOUSE SENSITIVITY",13,MINT))')
+s=s.replace('world.sunlight.light_energy,0.30 if cold else (0.45 if model.storm else 0.85)','world.sunlight.light_energy,(0.30 if cold else (0.45 if model.storm else 0.85))*weather.daylight')
+s=s.replace('dust_devil.position = world.point(', 'dust_devil.position = world.to_global(world.point(').replace('sin(model.elapsed*0.014)*350)\n', 'sin(model.elapsed*0.014)*350))\n')
+s=s.replace('"climbing":"Climbing rig / steeper slopes and higher jumps"','"climbing":"Climbing support / buy harnesses, crampons and ropes for steep routes"')
+s=s.replace('v.add_child(action("FIELD JOURNAL",journal))','v.add_child(action("FIELD JOURNAL",journal))')
+# Success and death have explicit follow-up choices instead of reviving a failed wallet.
+s=s.replace('var v := menu(860)\n\tv.add_child(text("06 / MISSION DEBRIEF"', 'var v := menu(860)\n\tif not success: v.add_child(action("NEW CAMPAIGN / FORFEITURE CONFIRMED",func() -> void: campaign.restart(); model.phase = "PLANNING"; title_screen()))\n\telse: selected_seed = posmod(selected_seed+104729*campaign.expedition_number,999999999)+1\n\tv.add_child(text("06 / MISSION DEBRIEF"')
+p.write_text(s,encoding='utf-8')

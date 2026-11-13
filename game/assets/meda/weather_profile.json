@@ -1,0 +1,266 @@
+{
+  "version": 2,
+  "mission": "Mars 2020 / MEDA",
+  "sol": 20,
+  "source": "https://atmos.nmsu.edu/PDS/data/PDS4/Mars2020/mars2020_meda/data_calibrated_env/sol_0000_0089/sol_0020/",
+  "products": [
+    {
+      "id": "WE__0020___________CAL_ATS_________________P01",
+      "csvSha256": "a8fd6c85b1f39d0a4b91738538352071e751178408669ed922ef8114f7fa64fa"
+    },
+    {
+      "id": "WE__0020___________CAL_PS__________________P02",
+      "csvSha256": "30455d8556bea07291a1f5df56f0922755e4450983a936472b1cf702c84b7155"
+    }
+  ],
+  "windAnalog": {
+    "sol": 36,
+    "source": "https://atmos.nmsu.edu/PDS/data/PDS4/Mars2020/mars2020_meda/data_derived_env/sol_0000_0089/sol_0036/",
+    "product": "WE__0036___________DER_WS__________________P02",
+    "sha256": "cad6cf9c2fb2918c4047d254f682663d241eceaea20ae60cd3fa3e07ffd3c426",
+    "totalRows": 41538,
+    "acceptedStationaryRows": 40543,
+    "rejectedRows": 995,
+    "missingBoomFlagRows": 41538,
+    "reportedUncertaintyRows": 0,
+    "quantilesMps": {
+      "0.1": 1.78,
+      "0.2": 2.46,
+      "0.5": 4.86,
+      "0.75": 6.93,
+      "0.9": 8.96,
+      "0.95": 9.92,
+      "0.99": 11.85
+    },
+    "minMps": 0.0,
+    "maxMps": 16.24,
+    "limits": "Stationary rover only; 999999999 sentinel rejected. Both-booms flag is missing; do not assume a validated dual-boom solution. Quantiles from sol 36 are scenario magnitudes, not contemporaneous with sol 20 pressure/temperature or a storm diagnosis."
+  },
+  "profile": [
+    {
+      "lmstHour": 11.5,
+      "temperatureK": 233.9,
+      "pressurePa": 739.48,
+      "temperatureSamples": 1723,
+      "pressureSamples": 863
+    },
+    {
+      "lmstHour": 11.75,
+      "temperatureK": 232.36,
+      "pressurePa": 739.82,
+      "temperatureSamples": 1850,
+      "pressureSamples": 925
+    },
+    {
+      "lmstHour": 12.0,
+      "temperatureK": 233.41,
+      "pressurePa": 740.6,
+      "temperatureSamples": 1849,
+      "pressureSamples": 924
+    },
+    {
+      "lmstHour": 12.25,
+      "temperatureK": 236.7,
+      "pressurePa": 741.11,
+      "temperatureSamples": 1850,
+      "pressureSamples": 925
+    },
+    {
+      "lmstHour": 12.5,
+      "temperatureK": 236.69,
+      "pressurePa": 741.57,
+      "temperatureSamples": 1849,
+      "pressureSamples": 925
+    },
+    {
+      "lmstHour": 12.75,
+      "temperatureK": 237.04,
+      "pressurePa": 741.79,
+      "temperatureSamples": 1850,
+      "pressureSamples": 925
+    },
+    {
+      "lmstHour": 13.0,
+      "temperatureK": 235.89,
+      "pressurePa": 742.2,
+      "temperatureSamples": 649,
+      "pressureSamples": 294
+    },
+    {
+      "lmstHour": 14.0,
+      "temperatureK": 240.51,
+      "pressurePa": 740.24,
+      "temperatureSamples": 1724,
+      "pressureSamples": 863
+    },
+    {
+      "lmstHour": 14.25,
+      "temperatureK": 241.73,
+      "pressurePa": 739.23,
+      "temperatureSamples": 1850,
+      "pressureSamples": 925
+    },
+    {
+      "lmstHour": 14.5,
+      "temperatureK": 241.84,
+      "pressurePa": 738.41,
+      "temperatureSamples": 1849,
+      "pressureSamples": 925
+    },
+    {
+      "lmstHour": 14.75,
+      "temperatureK": 242.78,
+      "pressurePa": 737.51,
+      "temperatureSamples": 1849,
+      "pressureSamples": 924
+    },
+    {
+      "lmstHour": 15.0,
+      "temperatureK": 243.76,
+      "pressurePa": 737.22,
+      "temperatureSamples": 686,
+      "pressureSamples": 313
+    },
+    {
+      "lmstHour": 16.0,
+      "temperatureK": 243.19,
+      "pressurePa": 735.12,
+      "temperatureSamples": 1846,
+      "pressureSamples": 924
+    },
+    {
+      "lmstHour": 16.25,
+      "temperatureK": 242.82,
+      "pressurePa": 734.66,
+      "temperatureSamples": 1849,
+      "pressureSamples": 925
+    },
+    {
+      "lmstHour": 16.5,
+      "temperatureK": 242.55,
+      "pressurePa": 734.76,
+      "temperatureSamples": 1850,
+      "pressureSamples": 925
+    },
+    {
+      "lmstHour": 16.75,
+      "temperatureK": 241.51,
+      "pressurePa": 734.83,
+      "temperatureSamples": 1849,
+      "pressureSamples": 924
+    },
+    {
+      "lmstHour": 17.0,
+      "temperatureK": 240.5,
+      "pressurePa": 734.64,
+      "temperatureSamples": 662,
+      "pressureSamples": 318
+    },
+    {
+      "lmstHour": 18.0,
+      "temperatureK": 231.94,
+      "pressurePa": 734.32,
+      "temperatureSamples": 1724,
+      "pressureSamples": 863
+    },
+    {
+      "lmstHour": 18.25,
+      "temperatureK": 229.09,
+      "pressurePa": 733.97,
+      "temperatureSamples": 1849,
+      "pressureSamples": 925
+    },
+    {
+      "lmstHour": 18.5,
+      "temperatureK": 226.3,
+      "pressurePa": 733.54,
+      "temperatureSamples": 1850,
+      "pressureSamples": 925
+    },
+    {
+      "lmstHour": 18.75,
+      "temperatureK": 223.65,
+      "pressurePa": 733.95,
+      "temperatureSamples": 1849,
+      "pressureSamples": 924
+    },
+    {
+      "lmstHour": 19.0,
+      "temperatureK": 220.29,
+      "pressurePa": 734.93,
+      "temperatureSamples": 686,
+      "pressureSamples": 313
+    },
+    {
+      "lmstHour": 20.0,
+      "temperatureK": 216.79,
+      "pressurePa": 747.36,
+      "temperatureSamples": 1723,
+      "pressureSamples": 863
+    },
+    {
+      "lmstHour": 20.25,
+      "temperatureK": 214.45,
+      "pressurePa": 749.17,
+      "temperatureSamples": 1850,
+      "pressureSamples": 925
+    },
+    {
+      "lmstHour": 20.5,
+      "temperatureK": 212.9,
+      "pressurePa": 750.62,
+      "temperatureSamples": 1849,
+      "pressureSamples": 924
+    },
+    {
+      "lmstHour": 20.75,
+      "temperatureK": 214.34,
+      "pressurePa": 750.84,
+      "temperatureSamples": 1850,
+      "pressureSamples": 925
+    },
+    {
+      "lmstHour": 21.0,
+      "temperatureK": 211.77,
+      "pressurePa": 750.64,
+      "temperatureSamples": 686,
+      "pressureSamples": 313
+    },
+    {
+      "lmstHour": 22.0,
+      "temperatureK": 209.6,
+      "pressurePa": 744.88,
+      "temperatureSamples": 1723,
+      "pressureSamples": 863
+    },
+    {
+      "lmstHour": 22.25,
+      "temperatureK": 208.25,
+      "pressurePa": 744.0,
+      "temperatureSamples": 1850,
+      "pressureSamples": 925
+    },
+    {
+      "lmstHour": 22.5,
+      "temperatureK": 207.11,
+      "pressurePa": 743.31,
+      "temperatureSamples": 1849,
+      "pressureSamples": 924
+    },
+    {
+      "lmstHour": 22.75,
+      "temperatureK": 206.22,
+      "pressurePa": 743.32,
+      "temperatureSamples": 1849,
+      "pressureSamples": 925
+    },
+    {
+      "lmstHour": 23.0,
+      "temperatureK": 205.49,
+      "pressurePa": 743.4,
+      "temperatureSamples": 687,
+      "pressureSamples": 313
+    }
+  ],
+  "limitations": "15-minute medians of ATS local sensor 1 temperature and Barocap 1 pressure. Duty-cycle gaps excluded. Sensor local temperature is not a corrected global air-temperature climatology. One Jezero sol cannot determine weather across generated districts. Wind, haze, frost and storm states are seeded physically motivated scenarios, not inferred observed events or live forecasts."
+}

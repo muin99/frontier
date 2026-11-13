@@ -1,0 +1,11 @@
+{
+  "sourceId": "REF-JPL-PLANET-PHYSICAL",
+  "provider": "NASA / JPL Solar System Dynamics",
+  "sourceUrl": "https://ssd.jpl.nasa.gov/planets/phys_par.html",
+  "retrievedAt": "2026-10-19",
+  "classification": "Planetary reference parameters; not live telemetry or a terrain dataset",
+  "body": "Mars",
+  "equatorialGravity": {"value": 3.71, "unit": "m/s²"},
+  "meanRadius": {"value": 3389.5, "uncertainty": 0.2, "unit": "km"},
+  "limitations": "Displayed for reference only in iteration 1. Facility architecture and vehicle designs are fictional. MOLA terrain, atmosphere and mission physics are not implemented yet."
+}

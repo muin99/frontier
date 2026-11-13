@@ -1,5 +1,9 @@
 # NASA Dataset Ledger
 
+**Iteration 5:** MOLA now supports a 1,536 m generated-composite arena. MEDA calibrated sol 20 temperature/pressure and derived sol 36 wind analog quantiles are shipped with labels, hashes, screening and limitations. See [weather evidence](WEATHER_DATA.md). Synthetic landforms and weather event timing remain explicit simulations; the candidate REMS/SPICE/CRISM layers below are still not claimed as implemented.
+
+**4 November implementation update:** DS-001 is now shipped: `MEGT90N000CB.IMG`, a reproducible 65 × 65 Isidis regional crop, rendering/collision and original-elevation landing readouts. See [exact provenance and limits](MARS_DATA.md). Local mineral layers, local slopes, weather observations and SPICE geometry below remain candidates, not implemented claims.
+
 This is a candidate-data registry, not a claim that every source will be shipped. The MVP should use a few datasets deeply and visibly. Every processed artifact must later include source URL, product identifier, retrieval date, transformation script/version, coordinate reference, resolution, missing-data behavior, checksum, and license/usage note.
 
 ## MVP candidates
