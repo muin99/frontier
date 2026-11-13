@@ -1,3 +1,19 @@
+# Frontier 11: learn while playing
+
+Run **[Play.cmd](Play.cmd)** and select **PLAY FIRST MISSION**. No rocket or space
+knowledge is required to start. The first scans explain the tools and teach how
+scientists interpret evidence. F1 defines unfamiliar terms. In campaign flight,
+the coach explains each choice before you act and explains the result afterward.
+This Windows release is in `build/windows-v11`.
+
+The NASA services directory is `nasadatasets.md`. The game uses cached NASA PDS
+MOLA terrain and MEDA temperature, pressure and wind products from that service
+family. It does not connect to every listed API or require an online account.
+See [the precise dataset mapping](docs/DATASETS.md) and
+[beginner playtest notes](docs/ONBOARDING_PLAYTEST.md).
+
+---
+
 # Frontier 10: less floaty Mars movement
 
 Run **[Play.cmd](Play.cmd)** for the updated build in `build/windows-v10`.

@@ -78,3 +78,25 @@ A dataset enters the MVP only if the team can answer all five questions:
 4. What player decision changes because of it?
 5. Can a judge trace the transformed value back to a canonical product?
 
+# Implemented mapping to nasadatasets.md — 13 November 2026
+
+The supplied file lists NASA services, rather than individual required products.
+This build uses products from its **PDS** service family, downloaded from NASA
+archive nodes and cached for offline play. The PDS Search API is not queried at
+runtime. No new observational download is claimed for the beginner update.
+
+| Product | Actual game use | Limits |
+| --- | --- | --- |
+| Mars Global Surveyor MOLA MEGDR regional elevation crop | Regional terrain mesh/collision and landing-approach elevation readouts | Local rocks, routes and discoveries are authored/procedural; coarse relief cannot establish landing safety |
+| Mars 2020 MEDA sol 20 ATS temperature and Barocap pressure | Historical weather profile, HUD, weather density calculation and mission rehearsal | Local sensor readings; not current weather or a global climate model |
+| Mars 2020 MEDA sol 36 derived wind | Observed wind quantiles bound the game's wind analog | Different sol from temperature/pressure; dust events and their timing are simulated |
+
+Source IDs, units, checksums and transformations are in MARS_DATA.md,
+WEATHER_DATA.md and game/assets/meda/weather_profile.json. NASA POWER, FIRMS,
+GIBS, Earthdata Login, OSDR, IRSA, WebGeocalc and the other listed services are
+not used in this build. Using all services is not required by the supplied brief.
+
+The historical planning ledger below does not override this implementation record.
+
+---
+

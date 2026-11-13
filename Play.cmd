@@ -1,5 +1,9 @@
 @echo off
 cd /d "%~dp0"
+if exist "build\windows-v11\Mohashunnyo.exe" (
+  start "Mohashunnyo" "build\windows-v11\Mohashunnyo.exe" %*
+  exit /b 0
+)
 if exist "build\windows-v10\Mohashunnyo.exe" (
   start "Mohashunnyo" "build\windows-v10\Mohashunnyo.exe" %*
   exit /b 0

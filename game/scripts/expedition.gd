@@ -69,13 +69,14 @@ func first_mission() -> void:
 	v.add_child(text("FIRST MISSION / ABOUT 5 MINUTES",15,MINT))
 	v.add_child(text("Two discoveries. One safe return.",34))
 	v.add_child(paragraph("You are the mission commander. Learn to move, collect two rock observations, and bring the crew home. Your rocket and supplies are provided. This practice mission never spends campaign money or replaces a saved expedition.",21))
+	v.add_child(action("START PRACTICE / NO SPACE KNOWLEDGE NEEDED",start_first_mission,true))
 	v.add_child(text("1  WALK TO THE CYAN MARKER",21,MINT))
 	v.add_child(paragraph("WASD moves. Mouse looks. Follow the destination and distance at the top of the screen. Hold E near a marked target for three seconds to scan it.",19))
 	v.add_child(text("2  WATCH YOUR OXYGEN",21,MINT))
 	v.add_child(paragraph("The habitat refills oxygen and battery while you stand nearby. Return early if reserves are low. Escape pauses and explains your next step.",19))
+	v.add_child(paragraph("Oxygen is your breathing air. Battery is electricity for your tools. The habitat is the white crew shelter. Scanning means using a tool to record an observation; you do not need to identify the rock yourself.",19,MINT))
 	v.add_child(text("3  RETURN WITH TWO OBSERVATIONS",21,MINT))
 	v.add_child(paragraph("After both scans, follow the marker home. Press E at the habitat and choose Return to Earth. Building, crafting and advanced equipment can wait.",19))
-	v.add_child(action("LAND ON MARS / START PRACTICE",start_first_mission,true))
 	v.add_child(action("BACK",title_screen)); focus_first(v)
 
 func start_first_mission() -> void:
@@ -108,6 +109,8 @@ func mission_help() -> void:
 	v.add_child(text(guided_instruction() if guided else "Collect evidence. Protect the crew.",28))
 	v.add_child(paragraph("WASD: walk. Mouse: look. Hold E at a cyan survey target until its scan bar fills. Two distinct observations are needed. Return to the main habitat to command ascent; standing nearby restores oxygen and battery.",21))
 	v.add_child(paragraph("V: switch first/third person. Tab: map. Escape: pause. In campaign mode, survey two districts and meet the science quota too. Building and crafting are optional ways to extend your range.",18))
+	v.add_child(text("SPACE WORDS / PLAIN MEANINGS",16,MINT))
+	v.add_child(paragraph(preload("res://scripts/beginner_lessons.gd").GLOSSARY,18))
 	v.add_child(action("BACK TO FIELD",resume_surface,true)); focus_first(v)
 
 func guided_playtest() -> void:
@@ -133,7 +136,11 @@ func guided_playtest() -> void:
 			await get_tree().physics_frame
 			if is_instance_valid(overlay): break
 		if not model.samples.has(i): errors.append("Guided scan failed "+str(i)); break
-		evidence_screen(i); resume_surface()
+		evidence_screen(i)
+		var lesson_buttons := overlay.find_children("*","Button",true,false)
+		lesson_buttons[0 if i==0 else 1].pressed.emit()
+		if not model.interpreted.has(i): errors.append("Beginner evidence lesson did not record answer")
+		resume_surface()
 	if model.samples.size()!=2: errors.append("Missing guided evidence")
 	var home := false
 	player.set_test_move_input(Vector2(0,-1))
@@ -152,6 +159,31 @@ func guided_playtest() -> void:
 	if save_after!=save_before: errors.append("Practice replaced campaign save")
 	for error: String in errors: push_error(error)
 	print("GUIDED PLAYTHROUGH: ","PASS" if errors.is_empty() else "FAIL"," / live movement, two held scans, return route, ascent, debrief, campaign/save isolation; oxygen ",model.oxygen," integrity ",model.integrity," elapsed ",model.elapsed)
+	get_tree().quit(0 if errors.is_empty() else 1)
+
+func learning_playtest() -> void:
+	testing = true; campaign.persistent = false
+	var errors: Array[String] = []
+	var lessons = preload("res://scripts/beginner_lessons.gd")
+	for event: Array in flight.EVENTS:
+		if lessons.flight_help(str(event[0])).begins_with("Protect people first."): errors.append("Missing lesson: "+str(event[0]))
+	model.configure(1,0); flight.reset(42601)
+	for stage: int in range(6):
+		flight_screen()
+		var correct := int(flight.current()[3])
+		var buttons := overlay.find_children("*","Button",true,false)
+		buttons[correct].pressed.emit()
+		if flight.stage!=stage+1: errors.append("Flight answer did not advance once")
+		var feedback := overlay.find_children("*","Button",true,false)
+		if feedback.size()!=1: errors.append("Flight feedback missing"); break
+		feedback[0].pressed.emit()
+	if model.phase!="SURFACE": errors.append("Coached flight did not reach Mars")
+	model.configure(1,0); flight.reset(42601); flight_screen()
+	var wrong := (int(flight.current()[3])+1)%3
+	var buttons := overlay.find_children("*","Button",true,false); buttons[wrong].pressed.emit()
+	if flight.mistakes!=1 or model.integrity>=100 or overlay.find_children("*","Button",true,false).size()!=1: errors.append("Wrong-answer feedback missing")
+	for error: String in errors: push_error(error)
+	print("BEGINNER LEARNING: ","PASS" if errors.is_empty() else "FAIL"," / all 10 flight explanations, six coached decisions, feedback pause, wrong-answer consequence, landing")
 	get_tree().quit(0 if errors.is_empty() else 1)
 
 func matching_checkpoint() -> bool:
@@ -194,6 +226,8 @@ func flight_screen() -> void:
 	var event := flight.current(); var v := menu(900)
 	v.add_child(text("FLIGHT DIRECTOR / %d OF 6" % [flight.stage+1],16,MINT)); v.add_child(text(event[0],30))
 	v.add_child(paragraph(event[1],22)); v.add_child(paragraph("INTEGRITY %.0f%% • OXYGEN %.0f • BATTERY %.0f • INCIDENTS %d" % [model.integrity,model.oxygen,model.battery,flight.mistakes],17,GOLD))
+	v.add_child(text("FLIGHT COACH / WHAT YOU NEED TO KNOW",15,MINT))
+	v.add_child(paragraph(preload("res://scripts/beginner_lessons.gd").flight_help(str(event[0])),19))
 	for i: int in range(3):
 		var choice := i
 		v.add_child(action(event[2][i],func() -> void:
@@ -202,9 +236,19 @@ func flight_screen() -> void:
 				var protected := int(outpost.cargo.kits.get("rocket_radiation",0))>0 or int(outpost.cargo.kits.get("rocket_redundancy",0))>0
 				model.integrity = maxf(0,model.integrity-(17 if protected else 27)); model.battery = maxf(0,model.battery-8); model.oxygen = maxf(0,model.oxygen-10)
 			if model.integrity<=0: finish(false)
-			elif flight.finished(): land(true)
-			else: flight_screen()))
+			else: flight_feedback(event,correct)))
 	v.add_child(paragraph(event[4],15)); focus_first(v)
+
+func flight_feedback(event: Array, correct: bool) -> void:
+	var v := menu(850)
+	v.add_child(text("DECISION / "+("CREW PROTECTED" if correct else "HERE IS WHAT TO CHANGE"),15,MINT))
+	v.add_child(text("Why that choice matters",31))
+	v.add_child(paragraph(preload("res://scripts/beginner_lessons.gd").flight_help(str(event[0])),22))
+	v.add_child(paragraph("Recommended action: "+str(event[2][int(event[3])]),21,GOLD))
+	if not correct: v.add_child(paragraph("This choice used extra oxygen and battery and damaged the suit. Your next decision can still protect the crew. Read the coach before choosing.",19))
+	v.add_child(action("CONTINUE TO LANDING" if flight.finished() else "NEXT DECISION",func() -> void:
+		if flight.finished(): land(true)
+		else: flight_screen(),true)); focus_first(v)
 
 func gear_menu() -> void:
 	var v := menu(850); v.add_child(text("EVA / PERSONAL EQUIPMENT",29,MINT))
@@ -733,7 +777,7 @@ func lan_integration_test() -> void:
 	lan.close(); sfx.stop(); sfx.stream = null; await get_tree().process_frame; get_tree().quit(0 if errors.is_empty() else 1)
 
 func _ready() -> void:
-	get_window().title = "Mohashunnyo — Frontier 10"
+	get_window().title = "Mohashunnyo — Frontier 11"
 	var automated := false
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--capture=") or argument in ["--expedition-test","--ground-transfer-test","--frontier-test","--lan-host-test","--lan-client-test","--outpost-test","--campaign-test"]: automated = true
@@ -763,6 +807,8 @@ func _ready() -> void:
 	build_weather_visuals()
 	build_rover()
 	setup_frontier()
+	if "--learning-test" in OS.get_cmdline_user_args():
+		await learning_playtest(); return
 	if "--guided-test" in OS.get_cmdline_user_args():
 		await guided_playtest(); return
 	for arg: String in OS.get_cmdline_user_args():
@@ -820,6 +866,8 @@ func _ready() -> void:
 		elif capture_mode == "debrief": model.collect(0); model.collect(1); finish(true)
 		elif capture_mode == "planning": cinematic(); planning()
 		elif capture_mode == "evidence": model.collect(0); evidence_screen(0)
+		elif capture_mode == "beginner-lesson": guided = true; model.collect(0); evidence_screen(0)
+		elif capture_mode == "flight-coach": flight.reset(selected_seed); flight_screen()
 		elif capture_mode == "orbit": begin_expedition(); launch_time = -1
 		elif capture_mode.begins_with("region"):
 			var region_index := clampi(capture_mode.trim_prefix("region").to_int(),0,5)
@@ -1245,6 +1293,21 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_instance_valid(player) and model.phase == "SURFACE" and not is_instance_valid(overlay) and capture_mode == "" and not testing and not lan_active(): pause_screen()
 
 func evidence_screen(index: int) -> void:
+	if guided:
+		var lesson := menu(850)
+		lesson.add_child(text("DISCOVERY %d OF 2 / LEARN BY DOING" % model.samples.size(),15,MINT))
+		lesson.add_child(text("You recorded a rock observation.",30))
+		var tool := str(model.targets[index].instrument)
+		lesson.add_child(paragraph("Your light scanner compares how rock reflects light. Scientists use this to investigate what a rock may contain. It uses electricity: this scan cost 8 battery." if tool=="spectrometer" else "Your drill reaches material below the surface. Scientists compare it with exposed rock to investigate how conditions change the material. It uses electricity: this scan cost 8 battery.",21))
+		lesson.add_child(text("WHAT DID WE LEARN?",16,GOLD))
+		if not model.interpreted.has(index):
+			lesson.add_child(action("We have a clue to investigate / more observations are needed",func() -> void: model.interpret(index,true); evidence_screen(index),true))
+			lesson.add_child(action("One observation proves there is life here",func() -> void: model.interpret(index,false); evidence_screen(index)))
+		else:
+			lesson.add_child(paragraph("One observation is a clue, not proof of life. Comparing different observations makes a scientific explanation stronger. You can learn from either answer; practice does not punish a mistaken explanation.",21,MINT))
+		lesson.add_child(paragraph("NEXT: "+("Follow HOME to the white shelter. Press E there, then choose Return to Earth." if model.samples.size()>=2 else "Follow the next cyan marker. Hold E near it until the scan bar fills."),21,GOLD))
+		lesson.add_child(action("CONTINUE / FOLLOW THE MARKER",resume_surface)); focus_first(lesson)
+		return
 	var v := menu(850); var item: Dictionary = model.targets[index]
 	v.add_child(text("EVIDENCE SECURED    /    +%d SCIENCE" % item.science,14,MINT))
 	v.add_child(text(str(item.name),36)); v.add_child(paragraph(str(item.observation),21))

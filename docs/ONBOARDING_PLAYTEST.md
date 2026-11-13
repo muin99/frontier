@@ -1,5 +1,21 @@
 # First-player experience — 13 November 2026
 
+## Frontier 11 learning update
+
+The start button appears before the optional briefing detail. Plain definitions
+explain breathing air, stored electricity, shelter and observations. F1 includes
+a glossary. Each guided scan explains the instrument and its battery cost, asks
+the player to interpret a clue, and provides a gentle correction for overclaims.
+Campaign flight shows a coach explanation before each decision and pauses to
+explain the recommended action afterward. All ten event families have specific
+explanations rather than assuming spacecraft vocabulary.
+
+The `--learning-test` checks all ten explanations, presses the actual six flight
+decision buttons, verifies feedback pauses, continues to landing and exercises
+a wrong decision. The guided route test now answers one scientific question
+correctly and one incorrectly, and still checks safe return and save isolation.
+These checks do not substitute for independent first-time-player usability tests.
+
 ## Problems observed
 
 The previous opening put a launch button before the player had purchased eight

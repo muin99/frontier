@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
 $enginePath = Join-Path $PSScriptRoot 'godot/Godot_v4.7.2-stable_win64_console.exe'
-$output = Join-Path $projectRoot 'build/windows-v10'
+$output = Join-Path $projectRoot 'build/windows-v11'
 New-Item -ItemType Directory -Force $output | Out-Null
 & $enginePath --headless --path (Join-Path $projectRoot 'game') --export-release 'Windows Desktop' (Join-Path $output 'Mohashunnyo.exe')
 if ($LASTEXITCODE -ne 0) { throw 'Windows export failed' }
@@ -16,7 +16,9 @@ Copy-Item -LiteralPath (Join-Path $projectRoot 'docs/RELEASE_REVIEW.md') -Destin
 Copy-Item -LiteralPath (Join-Path $projectRoot 'docs/ONBOARDING_PLAYTEST.md') -Destination $output -Force
 @'
 MOHASHUNNYO: A LONG WAY HOME
-FRONTIER 10 / MARS MOVEMENT / 13 NOVEMBER 2026
+FRONTIER 11 / LEARN WHILE PLAYING / 13 NOVEMBER 2026
+No space knowledge needed: F1 explains terms, scans teach how to interpret evidence,
+and the flight coach explains each engineering choice before and after you act.
 Mars gravity remains 3.71 m/s2. Suited hops are now 0.75m with shorter airtime.
 Start with PLAY FIRST MISSION / GUIDED PRACTICE. Equipment is provided.
 WASD move, mouse look, follow cyan marker, hold E near target to scan.

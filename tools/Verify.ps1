@@ -13,6 +13,7 @@ function Invoke-GameCheck($name, $arguments, $sentinel) {
     }
 }
 New-Item -ItemType Directory -Force (Join-Path $projectRoot 'build') | Out-Null
+Invoke-GameCheck 'beginner-learning' @('--headless','--path',$gamePath,'--quit-after','10000','--','--learning-test') 'BEGINNER LEARNING: PASS'
 Invoke-GameCheck 'guided-playthrough' @('--headless','--fixed-fps','60','--path',$gamePath,'--quit-after','35000','--','--guided-test') 'GUIDED PLAYTHROUGH: PASS'
 Invoke-GameCheck 'mission-review-check' @('--headless','--path',$gamePath,'--script','res://scripts/test_mission_review.gd') 'MISSION REVIEW: PASS'
 Invoke-GameCheck 'expedition-check' @('--headless','--fixed-fps','60','--path',$gamePath,'--quit-after','30000','--','--expedition-test') 'EXPEDITION INTEGRATION: PASS'
