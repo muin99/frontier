@@ -23,14 +23,14 @@ func setup(game: Node) -> void:
 
 func spawn_staff() -> void:
 	var staff := [
-		["AMINA RAHMAN", "FLIGHT DIRECTOR", [Vector3(21,0.1,14), Vector3(27,0.1,14), Vector3(27,0.1,5), Vector3(21,0.1,5)], Color("4f9fb5")],
-		["ELIAS PARK", "PROPULSION", [Vector3(7,0.1,-12), Vector3(11,0.1,-12), Vector3(11,0.1,1), Vector3(7,0.1,1)], Color("d8e2e4")],
-		["MAYA CHEN", "LIFE SUPPORT", [Vector3(-20,0.1,13), Vector3(-28,0.1,13), Vector3(-28,0.1,3), Vector3(-20,0.1,3)], Color("80b69b")],
-		["RAFI ISLAM", "GROUND CREW", [Vector3(-20,0.1,13), Vector3(-12,0.1,6), Vector3(8,0.1,7), Vector3(8,0.1,-8), Vector3(-8,0.1,-8)], Color("c59a50")],
-		["SOFIA OKAFOR", "SYSTEMS ENGINEER", [Vector3(-9,0.1,-4), Vector3(-9,0.1,-12), Vector3(8,0.1,-12), Vector3(8,0.1,-4)], Color("7f8fc1")]
+		["AMINA RAHMAN", "FLIGHT DIRECTOR", [Vector3(19.6,0.1,13.3), Vector3(24,0.1,13.3), Vector3(28.6,0.1,13.3), Vector3(24,0.1,13.3)], Color("1f3d7a"), "Every kilogram changes the mission. Take the briefing, then prove the numbers in the Flight Lab."],
+		["ELIAS PARK", "PROPULSION", [Vector3(6.6,0.1,-13.5), Vector3(6.6,0.1,-7.5), Vector3(6.6,0.1,2.5), Vector3(11,0.1,3.4)], Color("d9642b"), "Mars pulls at 3.71 m/s², about 38% of Earth. Getting down softly still takes engines: fly the simulator before launch."],
+		["MAYA CHEN", "LIFE SUPPORT", [Vector3(-19,0.1,3), Vector3(-19.5,0.1,-2.3), Vector3(-28.8,0.1,-2.3), Vector3(-19.5,0.1,-2.3)], Color("dfe6ea"), "Oxygen, water, power. Lose one on Mars and the clock starts. Pack the starter outpost at the Outfitter."],
+		["RAFI ISLAM", "GROUND CREW", [Vector3(-19,0.1,11.4), Vector3(-12,0.1,6), Vector3(-7.5,0.1,9.6), Vector3(7.5,0.1,9.6), Vector3(12,0.1,6), Vector3(7.5,0.1,9.6), Vector3(-7.5,0.1,9.6), Vector3(-12,0.1,6)], Color("e0a21e"), "Whatever you buy here rides to Mars as a kit. Press B to deploy it, then hold E to assemble."],
+		["SOFIA OKAFOR", "SYSTEMS ENGINEER", [Vector3(-6.8,0.1,-13.5), Vector3(-6.8,0.1,3), Vector3(-11,0.1,3.4), Vector3(-6.8,0.1,3)], Color("1f7f86"), "Isolate, verify, clear. In that order. The integration console in the high bay checks your sequence."]
 	]
 	for data: Array in staff:
-		var npc := NPC.new(); parent_game.add_child(npc); npc.setup(data[0], data[1], data[2], data[3])
+		var npc := NPC.new(); parent_game.add_child(npc); npc.setup(data[0], data[1], data[2], data[3], data[4])
 		if data[1] == "GROUND CREW": ground_crew = npc
 
 func buy(item: Dictionary) -> bool:

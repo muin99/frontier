@@ -1,0 +1,20 @@
+MOHASHUNNYO: A LONG WAY HOME — JUDGE EDITION
+
+1. Extract the full Windows ZIP into a folder.
+2. Double-click Play.cmd. No installer, Python, editor or account is needed.
+3. Select PLAY FIRST MISSION / GUIDED PRACTICE ON MARS to learn.
+
+Follow cyan SCAN markers. WASD moves; mouse looks; HOLD E near a target to scan.
+Collect two observations, follow HOME, press E at the white shelter, Return to Earth.
+F1 explains the next step. Escape pauses the game while you read.
+
+For the full mission-design experience, choose START AT THE EARTH LAB / CAMPAIGN.
+The launch checklist and cyan beam guide the physical consoles.
+
+If the game cannot open, try Play-Compatible.cmd in the same folder.
+All runtime dependencies and NASA data are bundled. Windows 10/11 x64 is required.
+For a source checkout, Play.cmd downloads the verified game once, then works offline.
+
+Manual: JUDGE_GUIDE.md
+Videos and download links: https://github.com/muin99/frontier/releases/tag/v0.13.0
+Validation and remaining limits: RELEASE_VALIDATION.md

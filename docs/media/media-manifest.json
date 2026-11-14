@@ -1,0 +1,30 @@
+{
+  "source": "Godot Movie Maker captures of this repository; no generated visuals or voice",
+  "disclosure": "Scripted controller inputs for the complete beginner route; edited cinematic shots and controlled/staged adventure scenarios in the short demo.",
+  "videos": [
+    {
+      "file": "First-Mission-Walkthrough.mp4",
+      "duration_seconds": 169.3,
+      "bytes": 82873669,
+      "sha256": "cbc94d38a676d832393168a655431c9cb634cd96b5d3b5a08709ad30174f912c",
+      "subtitles": "First-Mission-Walkthrough.srt",
+      "dimensions": "1280x800 (720p game footage plus subtitle band)"
+    },
+    {
+      "file": "Game-Demo.mp4",
+      "duration_seconds": 86.03,
+      "bytes": 42166107,
+      "sha256": "9765e3aa9ab19a9b2a8f09cd8ebc1b152635fe7381a67dd73f84085038b1bd30",
+      "subtitles": "Game-Demo.srt",
+      "dimensions": "1280x800 (720p game footage plus subtitle band)"
+    },
+    {
+      "file": "Controls-and-Dashboard.mp4",
+      "duration_seconds": 79.03999999999999,
+      "bytes": 24713310,
+      "sha256": "c9a4b2019ad39cb2f30121d21073778a90f1aa5666eed8f70f702550a4774aa9",
+      "subtitles": "Controls-and-Dashboard.srt",
+      "dimensions": "1280x800 (720p game footage plus subtitle band)"
+    }
+  ]
+}

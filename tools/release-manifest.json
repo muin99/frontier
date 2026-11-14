@@ -1,0 +1,17 @@
+﻿{
+    "tag":  "v0.13.0",
+    "url":  "https://github.com/muin99/frontier/releases/download/v0.13.0/Mohashunnyo-Windows.zip",
+    "sha256":  "e8ac4a1bb647a5061bd06a2542ff045feaf15ac6afd864b6d169f404303ae1b5",
+    "files":  [
+                  {
+                      "name":  "Mohashunnyo.exe",
+                      "sha256":  "d34d36f3be1a6c49c56525ae86469b92e4f417ddf0b43cf00dd80c385c4b0562",
+                      "bytes":  109268480
+                  },
+                  {
+                      "name":  "Mohashunnyo.pck",
+                      "sha256":  "f2dd22bd904e5e60895381a5569dcdfe3cb3b7e53e5161c15fc8db85a79c3144",
+                      "bytes":  145156136
+                  }
+              ]
+}

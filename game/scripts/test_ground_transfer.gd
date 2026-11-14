@@ -1,16 +1,16 @@
 extends SceneTree
-## End-to-end scene handoff test: real procurement gates, countdown, departure timer.
+## Real lab cinematic -> manifest -> Mars architecture and earned rewards.
 func _initialize() -> void:
 	await process_frame
 	var port: Node = load("res://scenes/spaceport.tscn").instantiate()
 	root.add_child(port); current_scene = port
-	port.mission.accept_briefing(); port.mission.buy_baseline()
+	port.campaign.persistent = false; port.stock.recommended_pack()
+	for answer: int in [1,2,0]: port.campaign.integrate(port.stock,answer)
+	port.lab.briefed = true; port.lab.suited = true; port.lab.sim_rating = 2
 	for exercise: Dictionary in port.mission.exercise_data.exercises:
-		port.mission.submit_exercise(str(exercise.id),str(exercise.answer))
-	for delivery: Dictionary in port.mission.delivery_queue:
-		delivery.announced = true
-		if is_instance_valid(delivery.crate): delivery.crate.queue_free()
-	if not port.mission.begin_countdown():
-		push_error("Ground transfer could not authorize launch"); quit(1); return
-	port.clear_overlay(); port.mission.countdown = 0.01
-	port.mission._process(0.02)
+		port.mission.solved_exercises[str(exercise.id)] = true
+	port.selected_loadout = 2; port.selected_site = 1; port.selected_seed = 314159
+	port.clear_overlay(); port.begin_real_launch()
+	for frame: int in range(46):
+		port.update_launch(.5)
+		if port.leaving: break

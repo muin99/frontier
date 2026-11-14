@@ -1,0 +1,51 @@
+1
+00:00:00,000 --> 00:00:06,000
+MOHASHUNNYO: A LONG WAY HOME. Design a mission, read the planet, bring the crew home.
+
+2
+00:00:06,000 --> 00:00:12,000
+Begin in the 3D Earth lab. Prepare equipment, balance resources and integrate the vehicle.
+
+3
+00:00:12,000 --> 00:00:17,000
+Choose your commander. The lab, crew, spacecraft and consoles are actual game scenes.
+
+4
+00:00:17,000 --> 00:00:23,000
+The Flight Lab teaches engineering decisions. NASA data and game assumptions are identified separately.
+
+5
+00:00:23,000 --> 00:00:31,000
+Go for launch. A real in-engine ignition and ascent carries the mission toward Mars.
+
+6
+00:00:31,000 --> 00:00:41,000
+Fly terminal descent, or use assisted landing. This clip shows the actual assisted flight model.
+
+7
+00:00:41,000 --> 00:00:49,000
+Cancel speed and drift, then confirm touchdown. Landing quality affects mission resources and science.
+
+8
+00:00:49,000 --> 00:00:57,000
+Follow visible objectives and collect observations. The live first-mission route remains beginner-friendly.
+
+9
+00:00:57,000 --> 00:01:00,000
+Hold E to scan. Instruments cost electricity, so choices have resource consequences.
+
+10
+00:01:00,000 --> 00:01:05,000
+Optional thruster demonstration: Ctrl+Space spends a finite charge while Mars gravity stays unchanged.
+
+11
+00:01:05,000 --> 00:01:13,000
+Controlled hazard showcase: red rings warn of fictional impacts. Move clear or reach shelter.
+
+12
+00:01:13,000 --> 00:01:21,000
+Staged outpost showcase: deployable power, oxygen, shelter, industry and research extend exploration.
+
+13
+00:01:21,000 --> 00:01:26,010
+Bring the evidence home. Real game footage, edited for this showcase; no generated imagery or voice.

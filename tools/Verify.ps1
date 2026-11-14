@@ -1,5 +1,6 @@
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
+& (Join-Path $PSScriptRoot 'Ensure-Engine.ps1')
 $enginePath = Join-Path $PSScriptRoot 'godot/Godot_v4.7.2-stable_win64_console.exe'
 $gamePath = Join-Path $projectRoot 'game'
 function Invoke-GameCheck($name, $arguments, $sentinel) {
@@ -13,6 +14,9 @@ function Invoke-GameCheck($name, $arguments, $sentinel) {
     }
 }
 New-Item -ItemType Directory -Force (Join-Path $projectRoot 'build') | Out-Null
+Invoke-GameCheck 'lab-save-check' @('--headless','--path',$gamePath,'--script','res://scripts/test_lab_store.gd') 'LAB SAVE: PASS'
+Invoke-GameCheck 'landing-model-check' @('--headless','--path',$gamePath,'--script','res://scripts/test_landing_model.gd') 'LANDING MODEL: PASS'
+Invoke-GameCheck 'adventure-systems-check' @('--headless','--fixed-fps','60','--path',$gamePath,'--quit-after','25000','--','--adventure-test') 'ADVENTURE SYSTEMS: PASS'
 Invoke-GameCheck 'beginner-learning' @('--headless','--path',$gamePath,'--quit-after','10000','--','--learning-test') 'BEGINNER LEARNING: PASS'
 Invoke-GameCheck 'guided-playthrough' @('--headless','--fixed-fps','60','--path',$gamePath,'--quit-after','35000','--','--guided-test') 'GUIDED PLAYTHROUGH: PASS'
 Invoke-GameCheck 'mission-review-check' @('--headless','--path',$gamePath,'--script','res://scripts/test_mission_review.gd') 'MISSION REVIEW: PASS'

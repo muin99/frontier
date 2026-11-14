@@ -1,0 +1,79 @@
+1
+00:00:00,000 --> 00:00:04,000
+A complete first mission, captured from the game. Scripted controller inputs; live physics and survival.
+
+2
+00:00:04,000 --> 00:00:12,000
+No space knowledge is needed. Follow the cyan SCAN marker and the objective at the upper left.
+
+3
+00:00:12,000 --> 00:00:22,000
+Read the dashboard: AIR is breathing oxygen. TOOL BATTERY powers scans. SUIT is integrity.
+
+4
+00:00:22,000 --> 00:00:33,000
+WASD moves and the mouse looks. The destination distance decreases as you approach.
+
+5
+00:00:33,000 --> 00:00:43,100
+Air and battery fall outside shelter. In this first mission, construction is optional.
+
+6
+00:00:43,100 --> 00:00:46,130
+Hold E near the target for three seconds. A completed scan consumes 8 battery.
+
+7
+00:00:46,130 --> 00:00:51,130
+The light scanner records a rock observation. A clue supports investigation; it is not proof of life.
+
+8
+00:00:51,130 --> 00:00:55,130
+The learning screen explains the interpretation, then points you toward the next observation.
+
+9
+00:00:55,130 --> 00:01:10,000
+The second target uses a drill. Different instruments reveal different kinds of evidence.
+
+10
+00:01:10,000 --> 00:01:24,000
+NASA MOLA supplies regional elevation context. Local rocks, routes and discoveries are game scenarios.
+
+11
+00:01:24,000 --> 00:01:37,200
+Watch the remaining air and tool battery while you travel. Return to shelter if reserves are low.
+
+12
+00:01:37,200 --> 00:01:40,230
+Hold E again. Two distinct observations are required before the first return.
+
+13
+00:01:40,230 --> 00:01:45,230
+This time the scripted player tries the overclaim. The game explains why it is not supported.
+
+14
+00:01:45,230 --> 00:01:49,230
+A mistaken scientific explanation is a learning moment in practice, not a campaign penalty.
+
+15
+00:01:49,230 --> 00:02:04,000
+With both observations collected, follow HOME back to the white crew shelter.
+
+16
+00:02:04,000 --> 00:02:19,000
+The shelter restores breathing air and battery during active field play. Menus pause the simulation.
+
+17
+00:02:19,000 --> 00:02:33,260
+Approach the main habitat and press E. The return action unlocks when you have both observations.
+
+18
+00:02:33,260 --> 00:02:38,260
+Choose RETURN TO EARTH. Practice progress is separate from campaign funds and checkpoints.
+
+19
+00:02:38,260 --> 00:02:43,260
+Ascent is committed. The rendered spacecraft and camera show the crew leaving the surface.
+
+20
+00:02:43,260 --> 00:02:49,300
+Debrief: two observations and a safe return. Continue into the Earth lab to design your own campaign.

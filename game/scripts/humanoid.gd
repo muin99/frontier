@@ -14,6 +14,18 @@ var animation_position := 0.0
 var rest_bone_rotations: Dictionary = {}
 var detailed_suit := false
 var airborne := false
+const Gfx = preload("res://scripts/gfx.gd")
+const CREW := [
+	{"callsign":"VEGA","model":"mh_3183","height":1.03},
+	{"callsign":"LYRA","model":"mh_3488","height":1.0},
+	{"callsign":"ORION","model":"mh_3427","height":0.96},
+	{"callsign":"ATLAS","model":"mh_1037","height":0.96}]
+const SUITS := [
+	{"name":"FLIGHT BLUE","color":"2a5fb8"},
+	{"name":"LAUNCH ORANGE","color":"e2672a"},
+	{"name":"POLAR WHITE","color":"dfe6ea"},
+	{"name":"GRAPHITE","color":"3b4651"}]
+var role := ""
 const WALK_REFERENCE_SPEED := 1.024
 const RUN_REFERENCE_SPEED := 2.828
 
@@ -24,9 +36,10 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if moving and is_instance_valid(animation_player): correct_locomotion_posture()
 
-func build(color := Color("dbe6e8"), trim := Color("52dfd6"), helmet: bool = false, variant: int = 0, lab_coat: bool = false) -> void:
+func build(color := Color("dbe6e8"), trim := Color("52dfd6"), helmet: bool = false, variant: int = 0, lab_coat: bool = false, job := "") -> void:
 	suit_color = color
 	accent = trim
+	role = job
 	if helmet and ResourceLoader.exists("res://assets/characters/explorer_z2.glb"):
 		detailed_suit = true
 		imported_model = load("res://assets/characters/explorer_z2.glb").instantiate()
@@ -36,6 +49,7 @@ func build(color := Color("dbe6e8"), trim := Color("52dfd6"), helmet: bool = fal
 		for animation_name: String in ["idle","walk","run"]:
 			animation_player.get_animation(animation_name).loop_mode = Animation.LOOP_LINEAR
 		animation_player.play("idle")
+		suit_details()
 		return
 	if ResourceLoader.exists("res://assets/characters/mh_3427.glb"):
 		build_imported_human(helmet, variant, lab_coat)
@@ -62,8 +76,7 @@ func build(color := Color("dbe6e8"), trim := Color("52dfd6"), helmet: bool = fal
 		part("backpack", Vector3(0, 1.32, 0.24), Vector3(0.45, 0.62, 0.22), Color("8799a1"))
 
 func build_imported_human(helmet: bool, variant: int, lab_coat: bool) -> void:
-	var paths := ["mh_3183","mh_3488","mh_3427","mh_1037"]
-	var model_path := "res://assets/characters/%s.glb" % paths[posmod(variant,paths.size())]
+	var model_path := "res://assets/characters/%s.glb" % str(CREW[posmod(variant,CREW.size())].model)
 	var packed: PackedScene = load(model_path)
 	imported_model = packed.instantiate()
 	imported_model.name = "RiggedHuman"
@@ -71,7 +84,7 @@ func build_imported_human(helmet: bool, variant: int, lab_coat: bool) -> void:
 	imported_model.rotation.y = PI
 	# Normalize the shorter body to the male rig's gameplay height. Collision and
 	# camera framing can then stay consistent across the player and every NPC.
-	imported_model.scale = Vector3.ONE * ([1.03,1.0,0.96,0.96][posmod(variant,4)])
+	imported_model.scale = Vector3.ONE * float(CREW[posmod(variant,CREW.size())].height)
 	add_child(imported_model)
 	for node: Node in imported_model.find_children("*","MeshInstance3D",true,false):
 		for surface: int in range(node.mesh.get_surface_count()):
@@ -82,8 +95,13 @@ func build_imported_human(helmet: bool, variant: int, lab_coat: bool) -> void:
 			material.metallic = 0; material.roughness = 0.72; material.metallic_specular = 0.28
 			if "body" in material.resource_name.to_lower(): material.roughness = 0.58; material.metallic_specular = 0.34
 			if "iris" in material.resource_name.to_lower(): material.roughness = 0.16; material.metallic_specular = 0.5
-			if "hair" in material.resource_name.to_lower(): material.cull_mode = BaseMaterial3D.CULL_DISABLED
-			node.set_surface_override_material(surface,material)
+			if "hair" in material.resource_name.to_lower() or "beard" in material.resource_name.to_lower() or "moustache" in material.resource_name.to_lower():
+				material.cull_mode = BaseMaterial3D.CULL_DISABLED; material.roughness = 0.6
+				material.albedo_color = Color(0.3,0.4,0.42) if "maxwell" in material.resource_name.to_lower() else Color(0.72,0.7,0.68)
+			var label := material.resource_name.to_lower()
+			if not helmet and ("suit" in label or "skirt" in label or "shirt" in label) and material.albedo_texture != null:
+				node.set_surface_override_material(surface,flight_suit(material))
+			else: node.set_surface_override_material(surface,material)
 	var skeletons := imported_model.find_children("*", "Skeleton3D", true, false)
 	if not skeletons.is_empty():
 		skeleton = skeletons[0]
@@ -105,7 +123,7 @@ func build_imported_human(helmet: bool, variant: int, lab_coat: bool) -> void:
 		part("life_support_pack", Vector3(0, 1.23, 0.18), Vector3(0.28, 0.40, 0.12), Color("788d95"))
 	else:
 		scientist = true
-		part("id_badge", Vector3(0.18, 1.30, -0.235), Vector3(0.07, 0.10, 0.008), accent)
+		accessories()
 
 func make_mat(color: Color, rough: float = 0.6, metallic: bool = false) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
@@ -217,3 +235,77 @@ func coat_panel(panel_name: String, vertices: PackedVector3Array, color: Color) 
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	panel.material_override = material
 	add_child(panel)
+
+## Recolours the scanned clothing into one uniform: fabric folds stay, casual colours go.
+func flight_suit(source: StandardMaterial3D) -> ShaderMaterial:
+	var cutout := source.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED
+	var code := """shader_type spatial;
+render_mode cull_disabled;
+uniform sampler2D cloth : source_color, filter_linear_mipmap_anisotropic;
+uniform vec3 suit : source_color = vec3(0.16,0.37,0.72);
+void fragment(){
+	vec4 t=texture(cloth,UV);
+	float l=dot(t.rgb,vec3(0.299,0.587,0.114));
+	float shade=clamp(0.66+(l-0.42)*0.9,0.38,1.18);
+	ALBEDO=suit*shade;
+	ROUGHNESS=0.74; SPECULAR=0.3;
+	//CUT
+}"""
+	if cutout: code = code.replace("//CUT","ALPHA=t.a; ALPHA_SCISSOR_THRESHOLD=0.5;")
+	var material := ShaderMaterial.new()
+	material.shader = Gfx.shader("flight_suit_cut" if cutout else "flight_suit",code)
+	material.set_shader_parameter("cloth",source.albedo_texture)
+	material.set_shader_parameter("suit",suit_color)
+	return material
+
+## Places a child so that it sits at a pose-space point but follows the named bone.
+func mount(bone: String,offset: Vector3) -> Node3D:
+	var holder := BoneAttachment3D.new()
+	skeleton.add_child(holder)
+	holder.bone_name = bone
+	var anchor := Node3D.new()
+	holder.add_child(anchor)
+	var rest: Transform3D = skeleton.get_bone_global_rest(skeleton.find_bone(bone))
+	anchor.transform = rest.affine_inverse()*Transform3D(Basis.IDENTITY,rest.origin+offset)
+	return anchor
+
+func piece(parent: Node3D,mesh: Mesh,p: Vector3,material: Material) -> MeshInstance3D:
+	var node := MeshInstance3D.new()
+	node.mesh = mesh; node.material_override = material; node.position = p
+	parent.add_child(node)
+	return node
+
+## Role props ride the skeleton: mission patch, headset, hard hat.
+func accessories() -> void:
+	if not is_instance_valid(skeleton) or skeleton.find_bone("head") < 0 or skeleton.find_bone("spine_03") < 0: return
+	var chest := mount("spine_03",Vector3(0.08,0.13,0.108))
+	var patch := BoxMesh.new(); patch.size = Vector3(0.045,0.045,0.01)
+	piece(chest,patch,Vector3.ZERO,Gfx.emissive(accent,1.2))
+	var head := mount("head",Vector3.ZERO)
+	var black := Gfx.surface(Color("151b21"),0.3,0.4)
+	if role in ["FLIGHT DIRECTOR","SYSTEMS ENGINEER","LIFE SUPPORT"]:
+		var band := TorusMesh.new(); band.inner_radius = 0.098; band.outer_radius = 0.112; band.rings = 24; band.ring_segments = 8
+		var arc := piece(head,band,Vector3(0,0.085,0.0),black); arc.rotation.x = PI/2
+		var cup := CylinderMesh.new(); cup.top_radius = 0.035; cup.bottom_radius = 0.035; cup.height = 0.03
+		for side: float in [-1.0,1.0]:
+			var ear := piece(head,cup,Vector3(side*0.098,0.07,0.0),black); ear.rotation.z = PI/2
+		var boom := BoxMesh.new(); boom.size = Vector3(0.008,0.008,0.11)
+		piece(head,boom,Vector3(0.1,0.04,0.055),black)
+		piece(head,patch,Vector3(0.1,0.035,0.115),Gfx.emissive(accent,2.0)).scale = Vector3.ONE*0.25
+	elif role in ["GROUND CREW","PROPULSION"]:
+		var shell := Gfx.surface(Color("f2c230") if role=="GROUND CREW" else Color("f3f5f6"),0.1,0.35)
+		var dome := SphereMesh.new(); dome.radius = 0.118; dome.height = 0.11; dome.is_hemisphere = true
+		piece(head,dome,Vector3(0,0.1,0.005),shell)
+		var brim := CylinderMesh.new(); brim.top_radius = 0.13; brim.bottom_radius = 0.135; brim.height = 0.012
+		piece(head,brim,Vector3(0,0.1,0.03),shell)
+
+## Suit running lights carry the commander's colour onto Mars.
+func suit_details() -> void:
+	var glow := Gfx.emissive(accent,2.6)
+	var bar := BoxMesh.new(); bar.size = Vector3(0.16,0.03,0.02)
+	piece(self,bar,Vector3(0,1.36,-0.27),glow)
+	for side: float in [-1.0,1.0]:
+		var lamp := SphereMesh.new(); lamp.radius = 0.03; lamp.height = 0.06
+		piece(self,lamp,Vector3(side*0.23,1.74,-0.12),Gfx.emissive(Color("fff4d8"),3.0))
+	var pack := BoxMesh.new(); pack.size = Vector3(0.05,0.2,0.02)
+	piece(self,pack,Vector3(0,1.3,0.36),glow)

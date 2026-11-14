@@ -333,6 +333,7 @@ func rebase() -> void:
 	origin += Vector2(shift.x,shift.z)
 	expedition.player.position -= shift; expedition.player.reset_physics_interpolation()
 	expedition.world.position -= shift
+	if is_instance_valid(expedition.hazards): expedition.hazards.shift(-shift)
 	for root: Node3D in chunks.values(): root.position -= shift
 	if expedition.lan_active(): expedition.lan.shift_remotes(shift)
 	if is_instance_valid(expedition.traversal):

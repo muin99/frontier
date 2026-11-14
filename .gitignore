@@ -6,3 +6,5 @@ build/
 tools/gamedev-skills/
 __pycache__/
 *.py[cod]
+.runtime/
+tools/media_vendor/

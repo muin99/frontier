@@ -1,0 +1,43 @@
+1
+00:00:00,000 --> 00:00:10,000
+TOP LEFT: your next action and destination. Follow the cyan marker; its distance tells you where to go.
+
+2
+00:00:10,000 --> 00:00:20,000
+TOP RIGHT: breathing AIR, TOOL BATTERY and SUIT integrity. Falling reserves mean it is time to recover.
+
+3
+00:00:20,000 --> 00:00:26,000
+SCAN: get close and hold E until the progress bar fills. Each observation consumes tool battery.
+
+4
+00:00:26,000 --> 00:00:34,000
+LEARNING CARDS: read what the tool observed, try an explanation and review the feedback.
+
+5
+00:00:34,000 --> 00:00:40,000
+LANDING CONTROLS: Space brakes, WASD steers, Enter toggles autopilot and Escape pauses.
+
+6
+00:00:40,000 --> 00:00:46,000
+CAMPAIGN: meet the science quota, collect two observations and survey two districts before returning.
+
+7
+00:00:46,000 --> 00:00:51,000
+THRUSTER: Ctrl+Space in the air spends charge. Standing on the ground recharges this game mechanic.
+
+8
+00:00:51,000 --> 00:00:57,000
+HAZARDS: red impact rings are a warning. These are controlled adventure scenarios, not NASA forecasts.
+
+9
+00:00:57,000 --> 00:01:06,000
+RECOVERY: stand near the main white shelter to refill air and battery. F1 explains unfamiliar terms.
+
+10
+00:01:06,000 --> 00:01:14,010
+RETURN: press E at the habitat, choose Return to Earth, then review what your decisions achieved.
+
+11
+00:01:14,010 --> 00:01:19,020
+START SIMPLE: play guided practice first. Use the Earth lab for the complete mission-design campaign.

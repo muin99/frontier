@@ -3,6 +3,8 @@ const World = preload("res://scripts/mars_world.gd")
 const Explorer = preload("res://scripts/player.gd")
 const Model = preload("res://scripts/expedition_model.gd")
 const MapView = preload("res://scripts/expedition_map.gd")
+const Gfx = preload("res://scripts/gfx.gd")
+const LandingSim = preload("res://scripts/landing_sim.gd")
 const MINT := Color("8de0d4")
 const GOLD := Color("eec393")
 const SAVE := "user://expedition_v8.json"
@@ -62,6 +64,19 @@ var receiving_campaign_end := false
 var guided := false
 var control_hint: Label
 var destination_hint: Label
+var descent: Node3D
+var landing_fuel_bonus := 0.0
+var hazards: Node3D
+var reserve_bars: Dictionary = {}
+var isolated_demo := false
+var guided_film := false
+
+func film_event(value: String) -> void:
+	if guided_film or "--film-adventure" in OS.get_cmdline_user_args(): print("FILM_EVENT ",JSON.stringify({"time":Engine.get_process_frames()/30.0,"event":value}))
+
+func film_pause(seconds: float) -> void:
+	if guided_film:
+		for frame: int in range(int(seconds*60)): await get_tree().physics_frame
 
 func first_mission() -> void:
 	if lan_active(): lan.close()
@@ -111,6 +126,7 @@ func mission_help() -> void:
 	v.add_child(paragraph("V: switch first/third person. Tab: map. Escape: pause. In campaign mode, survey two districts and meet the science quota too. Building and crafting are optional ways to extend your range.",18))
 	v.add_child(text("SPACE WORDS / PLAIN MEANINGS",16,MINT))
 	v.add_child(paragraph(preload("res://scripts/beginner_lessons.gd").GLOSSARY,18))
+	if not guided: v.add_child(paragraph("Ctrl + Space while airborne: use a short thruster burst. Fuel is limited and recharges on the ground. Red impact rings warn of fictional meteor hazards: move away or shelter. Thrusters and hazard rates are game mechanics, not certified equipment or NASA forecasts.",18,GOLD))
 	v.add_child(action("BACK TO FIELD",resume_surface,true)); focus_first(v)
 
 func guided_playtest() -> void:
@@ -118,9 +134,11 @@ func guided_playtest() -> void:
 	var campaign_before: Dictionary = campaign.snapshot().duplicate(true)
 	var save_before := FileAccess.get_file_as_string(SAVE) if FileAccess.file_exists(SAVE) else ""
 	start_first_mission()
+	film_event("touchdown"); await film_pause(4)
 	if not guided or model.phase!="SURFACE" or model.samples.size()!=0: errors.append("Practice start")
 	# Exercise real controller movement with live suit, weather and field updates.
 	for i: int in range(2):
+		film_event("walk_"+str(i+1))
 		var destination: Vector3 = world.beacons[i].global_position
 		var arrived := false
 		player.set_test_move_input(Vector2(0,-1))
@@ -132,17 +150,21 @@ func guided_playtest() -> void:
 		player.clear_test_move_input()
 		if not arrived: errors.append("Blocked guided target "+str(i)); break
 		scan_held = true
+		film_event("scan_"+str(i+1))
 		for frame: int in range(220):
 			await get_tree().physics_frame
 			if is_instance_valid(overlay): break
 		if not model.samples.has(i): errors.append("Guided scan failed "+str(i)); break
 		evidence_screen(i)
+		film_event("lesson_"+str(i+1)); await film_pause(5)
 		var lesson_buttons := overlay.find_children("*","Button",true,false)
 		lesson_buttons[0 if i==0 else 1].pressed.emit()
 		if not model.interpreted.has(i): errors.append("Beginner evidence lesson did not record answer")
+		await film_pause(4)
 		resume_surface()
 	if model.samples.size()!=2: errors.append("Missing guided evidence")
 	var home := false
+	film_event("return_home")
 	player.set_test_move_input(Vector2(0,-1))
 	for frame: int in range(16000):
 		var offset: Vector3 = world.to_global(world.habitat)-player.global_position
@@ -151,15 +173,16 @@ func guided_playtest() -> void:
 		await get_tree().physics_frame
 	player.clear_test_move_input()
 	if not home or model.integrity<=0 or expedition_return_gaps()!="": errors.append("Guided return not viable")
-	habitat_console(); begin_return()
+	habitat_console(); film_event("habitat"); await film_pause(5); begin_return(); film_event("ascent")
 	for frame: int in range(300): await get_tree().physics_frame
 	if model.phase!="RETURNED": errors.append("Guided ascent/debrief")
+	film_event("debrief"); await film_pause(6)
 	if campaign.snapshot()!=campaign_before: errors.append("Practice mutated campaign")
 	var save_after := FileAccess.get_file_as_string(SAVE) if FileAccess.file_exists(SAVE) else ""
 	if save_after!=save_before: errors.append("Practice replaced campaign save")
 	for error: String in errors: push_error(error)
 	print("GUIDED PLAYTHROUGH: ","PASS" if errors.is_empty() else "FAIL"," / live movement, two held scans, return route, ascent, debrief, campaign/save isolation; oxygen ",model.oxygen," integrity ",model.integrity," elapsed ",model.elapsed)
-	get_tree().quit(0 if errors.is_empty() else 1)
+	get_tree().call_deferred("quit",0 if errors.is_empty() else 1)
 
 func learning_playtest() -> void:
 	testing = true; campaign.persistent = false
@@ -494,6 +517,7 @@ func setup_frontier() -> void:
 	traversal = preload("res://scripts/rope_system.gd").new(); add_child(traversal); traversal.setup(self)
 	field = preload("res://scripts/field_challenges.gd").new(); add_child(field); field.setup(self)
 	music = preload("res://scripts/music_director.gd").new(); add_child(music)
+	hazards = preload("res://scripts/hazards.gd").new(); add_child(hazards); hazards.setup(self); hazards.reset(selected_seed)
 	goal_marker = Node3D.new(); add_child(goal_marker)
 	var ring := TorusMesh.new(); ring.inner_radius = .75; ring.outer_radius = .85
 	var material := world.mat(MINT); material.emission_enabled = true; material.emission = MINT
@@ -503,6 +527,25 @@ func setup_frontier() -> void:
 
 func lan_active() -> bool:
 	return is_instance_valid(lan) and lan.active and lan.session_ready
+
+func campaign_destination() -> Dictionary:
+	var home := world.to_global(world.habitat)
+	if model.oxygen<45 or model.battery<20: return {"p":home,"label":"REFILL AT HABITAT"}
+	if model.samples.size()>=2 and visited_regions.size()>=2 and model.science>=campaign.quota(): return {"p":home,"label":"RETURN HOME / E AT HABITAT"}
+	if model.samples.size()>=2 and visited_regions.size()<2:
+		var best := INF; var destination := home
+		for i: int in range(world.generator.regions.size()):
+			if visited_regions.has(i): continue
+			var centre: Vector2 = world.generator.regions[i].centre
+			var at: Vector3 = world.to_global(world.point(centre.x,centre.y))
+			if at.distance_to(player.global_position)<best: best = at.distance_to(player.global_position); destination = at
+		return {"p":destination,"label":"SURVEY ANOTHER DISTRICT"}
+	var best := INF; var destination := home
+	for i: int in range(world.beacons.size()):
+		if model.can_sample(i)!="": continue
+		var at: Vector3 = world.beacons[i].global_position
+		if at.distance_to(player.global_position)<best: best = at.distance_to(player.global_position); destination = at
+	return {"p":destination,"label":"HOLD E / COLLECT EVIDENCE"}
 
 func update_goal_marker() -> void:
 	goal_marker.hide()
@@ -522,7 +565,18 @@ func update_goal_marker() -> void:
 			if child is Label3D: child.text = "HOME" if model.samples.size() >= 2 or model.oxygen < 45 or model.battery < 20 else "HOLD E / SCAN"
 		return
 	destination_hint.hide()
-	if stream.active.is_empty(): return
+	if stream.active.is_empty():
+		var goal := campaign_destination(); var at: Vector3 = goal.p
+		goal_marker.global_position = at; goal_marker.show()
+		for child: Node in goal_marker.get_children():
+			if child is Label3D: child.text = str(goal.label)
+		destination_hint.show()
+		var offset := at-player.global_position
+		var angle := wrapf(atan2(-offset.x,-offset.z)-player.camera_yaw,-PI,PI)
+		var bearing := "AHEAD" if absf(angle)<.4 else ("TURN LEFT" if angle>0 else "TURN RIGHT")
+		destination_hint.text = "%s / %dm / %s" % [goal.label,Vector2(offset.x,offset.z).length(),bearing]
+		destination_hint.position = Vector2(36,155)
+		return
 	var site: Dictionary = stream.active; var p: Vector3 = site.position
 	if site.type == "parkour": p = stream.course_point(site,stream.active_step)
 	elif site.type in ["seismic","survey","navigation"]:
@@ -777,10 +831,14 @@ func lan_integration_test() -> void:
 	lan.close(); sfx.stop(); sfx.stream = null; await get_tree().process_frame; get_tree().quit(0 if errors.is_empty() else 1)
 
 func _ready() -> void:
-	get_window().title = "Mohashunnyo — Frontier 11"
+	guided_film = "--guided-film" in OS.get_cmdline_user_args()
+	if guided_film or "--film-adventure" in OS.get_cmdline_user_args():
+		get_viewport().set_disable_input(true); DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_NO_FOCUS,true)
+	isolated_demo = "--landing-demo" in OS.get_cmdline_user_args() or guided_film or "--film-adventure" in OS.get_cmdline_user_args()
+	get_window().title = "Mohashunnyo — Frontier 13"
 	var automated := false
 	for argument: String in OS.get_cmdline_user_args():
-		if argument.begins_with("--capture=") or argument in ["--expedition-test","--ground-transfer-test","--frontier-test","--lan-host-test","--lan-client-test","--outpost-test","--campaign-test"]: automated = true
+		if argument.begins_with("--capture=") or argument.ends_with("-test") or argument.ends_with("-demo") or argument in ["--guided-film","--film-adventure"]: automated = true
 	if "--outpost-test" in OS.get_cmdline_user_args(): testing = true
 	campaign.persistent = not automated
 	if not automated: campaign.read()
@@ -793,6 +851,7 @@ func _ready() -> void:
 		var e := InputEventKey.new(); e.physical_keycode = bindings[a]
 		if not InputMap.action_has_event(a,e): InputMap.action_add_event(a,e)
 	world = World.new(); world.world_seed = selected_seed; add_child(world); world.build()
+	quality = Gfx.quality(); Gfx.grade(world.environment_resource,quality); Gfx.viewport_quality(get_viewport(),quality)
 	install_targets()
 	player = Explorer.new(); player.suited = true; player.gravity = Explorer.MARS_GRAVITY; add_child(player)
 	player.hard_landing.connect(func(speed: float) -> void:
@@ -807,6 +866,14 @@ func _ready() -> void:
 	build_weather_visuals()
 	build_rover()
 	setup_frontier()
+	if "--film-adventure" in OS.get_cmdline_user_args():
+		await preload("res://scripts/film_adventure.gd").new().run(self); return
+	if guided_film:
+		await guided_playtest(); return
+	if "--adventure-test" in OS.get_cmdline_user_args():
+		await preload("res://scripts/test_adventure.gd").new().run(self); return
+	if isolated_demo:
+		model.configure(1,0); selected_seed = 42601; begin_descent(true); return
 	if "--learning-test" in OS.get_cmdline_user_args():
 		await learning_playtest(); return
 	if "--guided-test" in OS.get_cmdline_user_args():
@@ -882,9 +949,12 @@ func _ready() -> void:
 		else: title_screen()
 		player.enabled = false; Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	elif get_tree().has_meta("ground_manifest"):
-		selected_loadout = 1; selected_site = 0; begin_expedition()
+		var manifest: Dictionary = get_tree().get_meta("ground_manifest")
+		selected_loadout = clampi(int(manifest.get("loadout",1)),0,2); selected_site = clampi(int(manifest.get("site",0)),0,1)
+		selected_seed = clampi(int(manifest.get("seed",selected_seed)),1,999999999); begin_expedition()
 		if "--ground-transfer-test" in OS.get_cmdline_user_args():
-			var valid := model.phase == "TRANSIT" and model.loadout == 1 and not get_tree().has_meta("ground_manifest") and model.log.size() == 3
+			var valid := model.phase == "TRANSIT" and model.loadout == int(manifest.get("loadout",1)) and model.site==int(manifest.get("site",0)) and not get_tree().has_meta("ground_manifest") and model.log.size() == 3
+			valid = valid and model.science == int(manifest.get("lab_science",0))+(15 if model.site==1 else 0) and landing_fuel_bonus == float(manifest.get("fuel_bonus",0))
 			print("GROUND TRANSFER: ","PASS" if valid else "FAIL")
 			get_tree().quit(0 if valid else 1)
 	else: title_screen()
@@ -927,6 +997,13 @@ func build_ui() -> void:
 	var right := PanelContainer.new(); right.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	right.position = Vector2(-355,26); right.size = Vector2(323,140); right.add_theme_stylebox_override("panel",panel_style()); hud.add_child(right)
 	resources = text("",18); right.add_child(resources)
+	var reserve_column := VBoxContainer.new(); reserve_column.add_theme_constant_override("separation",7)
+	right.remove_child(resources); right.add_child(reserve_column); reserve_column.add_child(resources)
+	for key: String in ["AIR","TOOL BATTERY","SUIT","THRUSTER"]:
+		var row := HBoxContainer.new(); reserve_column.add_child(row)
+		var caption := text(key,12,MINT); caption.custom_minimum_size.x = 110; row.add_child(caption)
+		var bar := ProgressBar.new(); bar.max_value = 100; bar.show_percentage = true; bar.custom_minimum_size = Vector2(160,20)
+		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE; row.add_child(bar); reserve_bars[key] = bar
 	var bottom := PanelContainer.new(); bottom.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	bottom.position = Vector2(32,-106); bottom.size = Vector2(1040,74); bottom.add_theme_stylebox_override("panel",panel_style()); hud.add_child(bottom)
 	var bv := VBoxContainer.new(); bottom.add_child(bv)
@@ -946,6 +1023,18 @@ func build_ui() -> void:
 	destination_hint = text("",23,MINT)
 	destination_hint.add_theme_color_override("font_outline_color",Color("0b1820")); destination_hint.add_theme_constant_override("outline_size",7)
 	hud.add_child(destination_hint); destination_hint.hide()
+
+func update_reserve_bars() -> void:
+	var layout: Dictionary = Model.LOADOUTS[model.loadout]
+	var values := {"AIR":model.oxygen/float(layout.oxygen)*100,"TOOL BATTERY":model.battery/float(layout.battery)*100,"SUIT":model.integrity,"THRUSTER":player.jet_fuel}
+	for key: String in reserve_bars:
+		var bar: ProgressBar = reserve_bars[key]; bar.value = float(values[key])
+		bar.get_parent().visible = key!="THRUSTER" or not guided
+		var color := MINT if bar.value>=35 else (GOLD if bar.value>=15 else Color("ff6655"))
+		if bar.get_meta("reserve_color",Color.TRANSPARENT)!=color:
+			var fill := StyleBoxFlat.new(); fill.bg_color = color; fill.set_corner_radius_all(4)
+			bar.add_theme_stylebox_override("fill",fill); bar.set_meta("reserve_color",color)
+	resources.text = "EVIDENCE %d / 2\n%s" % [model.samples.size(),"PRACTICE / SAVE SAFE" if guided else "SCIENCE %d / %d" % [model.science,campaign.quota()]]
 
 func clear_menu() -> void:
 	if is_instance_valid(overlay): overlay.queue_free(); overlay = null
@@ -986,9 +1075,10 @@ func title_screen() -> void:
 	v.add_child(text("A long way\nhome.",68))
 	v.add_child(paragraph("Design the mission. Read the planet.\nBring them home.",24,GOLD))
 	v.add_child(paragraph("Lead a crew into the Isidis region. Choose what to carry, weather a power crisis, and bring back evidence worth the journey.",18))
-	v.add_child(paragraph("New here? Start with the guided first mission.",18,MINT))
-	v.add_child(action("PLAY FIRST MISSION / GUIDED PRACTICE",first_mission,true))
-	v.add_child(action("DESIGN A CAMPAIGN MISSION",func() -> void: guided = false; planning()))
+	v.add_child(paragraph("New here? Fly the guided first mission, then prepare your own expedition in the Earth lab.",18,MINT))
+	v.add_child(action("START AT THE EARTH LAB / CAMPAIGN",enter_lab,true))
+	v.add_child(action("PLAY FIRST MISSION / GUIDED PRACTICE ON MARS",first_mission))
+	v.add_child(action("QUICK PLAN / SKIP THE LAB",func() -> void: guided = false; planning()))
 	if campaign.status=="ACTIVE" and not matching_checkpoint(): v.add_child(action("RESUME ACTIVE FLIGHT",resume_active_flight))
 	if campaign.status=="FAILED": v.add_child(action("START A NEW CAMPAIGN / RESET BUDGET",func() -> void: campaign.restart(); title_screen()))
 	v.add_child(action("CO-OP, WORKSHOP & NASA SOURCES",extras_menu))
@@ -1003,8 +1093,16 @@ func extras_menu() -> void:
 	v.add_child(action("LOCAL NETWORK CO-OP",lan_menu))
 	v.add_child(action("EQUIPMENT WORKSHOP",func() -> void: preload("res://scripts/outpost_shop.gd").new().show_shop(self)))
 	v.add_child(action("NASA DATA & SCIENCE NOTES",func() -> void: source_return = "title"; sources()))
-	v.add_child(action("EXPLORE EARTH SPACEPORT",func() -> void: get_tree().change_scene_to_file("res://scenes/spaceport.tscn")))
+	v.add_child(action("EARTH LAB / PREPARE AND LAUNCH",enter_lab))
 	v.add_child(action("BACK",title_screen,true)); focus_first(v)
+
+func enter_lab() -> void:
+	if lan_active(): lan.close()
+	var v := menu(650,true)
+	v.add_child(text("EARTH OPERATIONS",14,MINT)); v.add_child(text("Opening the lab…",44))
+	await get_tree().process_frame
+	await get_tree().process_frame
+	get_tree().change_scene_to_file("res://scenes/spaceport.tscn")
 
 func planning() -> void:
 	var procurement := preload("res://scripts/outpost_cargo.gd").new(); procurement.read_draft()
@@ -1095,10 +1193,14 @@ func begin_expedition() -> void:
 	regenerate_world(selected_seed)
 	outpost.reset_for_launch()
 	model.configure(selected_loadout,selected_site)
+	landing_fuel_bonus = 0.0; hazards.reset(selected_seed); player.jet_fuel = 100.0
 	visited_regions.clear(); model.weather_driven = true
 	set_driving(false)
 	if get_tree().has_meta("ground_manifest"):
 		var manifest: Dictionary = get_tree().get_meta("ground_manifest")
+		landing_fuel_bonus = clampf(float(manifest.get("fuel_bonus",0)),0,24)
+		var lab_science := clampi(int(manifest.get("lab_science",0)),0,15)
+		model.science += lab_science
 		model.log.append("Earth integration cleared: %.0f kg hardware / %.1f kW; fission baseline mapped to normalized expedition reserves" % [float(manifest.mass),float(manifest.power)])
 		get_tree().remove_meta("ground_manifest")
 	world.ascent.position = world.point(17,27)
@@ -1122,6 +1224,25 @@ func transit_screen() -> void:
 	focus_first(v)
 
 func land(safe: bool) -> void:
+	if not testing and not guided and capture_mode=="":
+		begin_descent(safe); return
+	touchdown_surface(safe)
+
+func begin_descent(safe: bool) -> void:
+	if is_instance_valid(descent): return
+	clear_menu(); launch_time = -1; model.phase = "DESCENT"
+	player.enabled = false; player.velocity = Vector3.ZERO; player.hide(); hud.hide(); world.hide(); stream.hide(); outpost.hide(); orbital_stage.hide()
+	descent = LandingSim.new(); add_child(descent)
+	descent.finished.connect(func(result: Dictionary) -> void:
+		var completed := descent; descent = null; completed.queue_free()
+		model.integrity = maxf(0,model.integrity-float(result.get("damage",0)))
+		model.science += int(result.get("science",0)); model.log.append("Flown descent: "+str(result.get("label","touchdown")))
+		if model.integrity<=0: finish(false)
+		else: touchdown_surface(safe))
+	descent.start({"training":false,"seed":selected_seed,"fuel_bonus":landing_fuel_bonus})
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+func touchdown_surface(safe: bool) -> void:
 	model.transit(safe); storm_announced = false
 	world.show(); orbital_stage.hide(); cine.environment = null
 	map_view.show()
@@ -1130,6 +1251,7 @@ func land(safe: bool) -> void:
 	resume_surface(); checkpoint(); toast("04 / TOUCHDOWN\nB deploys kits • hold E to assemble • C fabricates • G recovers materials. Build power, oxygen and shelter to push farther.")
 
 func resume_surface() -> void:
+	player.jet_enabled = not guided
 	if is_instance_valid(outpost): outpost.show()
 	if is_instance_valid(stream): stream.show()
 	clear_menu(); player.visible = true; player.enabled = true; player.camera.current = true
@@ -1169,6 +1291,9 @@ func _process(delta: float) -> void:
 		traversal.tick(delta)
 		field.tick(delta)
 		var home := sheltered()
+		hazards.enabled = not guided and not lan_active()
+		hazards.visible = hazards.enabled
+		hazards.tick(delta,home)
 		var logical_position: Vector3 = stream.logical(player.position)
 		var region_index: int = world.generator.region_at(logical_position.x,logical_position.z)
 		var region_kind := "basin" if region_index < 0 else str(world.generator.regions[region_index].kind)
@@ -1210,6 +1335,7 @@ func _process(delta: float) -> void:
 		if outpost.prompt_text()!="": prompt.text = outpost.prompt_text()
 		resources.text += "\nFOOD %d%% • WATER %d%%" % [outpost.food,outpost.hydration]
 		if field.warning!="": prompt.text = field.warning
+		if hazards.enabled and hazards.warning!="": prompt.text = hazards.warning
 		if guided:
 			var destination := guided_destination()
 			var offset := destination-player.global_position
@@ -1223,6 +1349,7 @@ func _process(delta: float) -> void:
 				if target>=0 and model.can_sample(target)=="": prompt.text = "HOLD E for 3 seconds / "+str(model.targets[target].name)
 				elif at_main_habitat(): prompt.text = "Oxygen and battery refilling / E opens habitat / follow marker when ready"
 		update_goal_marker()
+		update_reserve_bars()
 		if scan_held and target >= 0 and model.can_sample(target) == "":
 			model.scan_progress += delta; scan_bar.show(); scan_bar.value = model.scan_progress
 			if model.scan_progress >= 3:
@@ -1257,6 +1384,7 @@ func _process(delta: float) -> void:
 			get_tree().quit()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_instance_valid(descent): return
 	if is_instance_valid(outpost) and outpost.handle_input(event): return
 	if event is InputEventKey:
 		if event.physical_keycode == KEY_E and not is_instance_valid(overlay) and model.phase == "SURFACE":
@@ -1290,7 +1418,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN else DisplayServer.WINDOW_MODE_FULLSCREEN)
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_instance_valid(player) and model.phase == "SURFACE" and not is_instance_valid(overlay) and capture_mode == "" and not testing and not lan_active(): pause_screen()
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_instance_valid(player) and model.phase == "SURFACE" and not is_instance_valid(overlay) and capture_mode == "" and not testing and not lan_active() and not guided_film and not "--film-adventure" in OS.get_cmdline_user_args(): pause_screen()
 
 func evidence_screen(index: int) -> void:
 	if guided:
@@ -1396,7 +1524,8 @@ func finish(success: bool) -> void:
 		guide_menu.add_child(text("FIRST MISSION / "+("COMPLETE" if success else "TRY AGAIN"),15,MINT))
 		guide_menu.add_child(text("You brought them home." if success else "The next crew has your experience.",34))
 		guide_menu.add_child(paragraph("You collected %d observations and returned with %d%% suit integrity. You learned movement, scanning and recovery. NASA MOLA supplies regional terrain; the equipment and survival rates are game models." % [model.samples.size(),model.integrity] if success else "Your suit ran out of reserves. Head back to the habitat sooner to refill. Your campaign money and saves are unchanged.",21))
-		guide_menu.add_child(action("DESIGN YOUR OWN MISSION",func() -> void: guided = false; planning(),true))
+		guide_menu.add_child(action("PREPARE YOUR OWN MISSION / EARTH LAB",enter_lab,true))
+		guide_menu.add_child(action("QUICK PLAN / SKIP THE LAB",func() -> void: guided = false; planning()))
 		guide_menu.add_child(action("PLAY PRACTICE AGAIN",start_first_mission))
 		guide_menu.add_child(action("TITLE SCREEN",title_screen)); focus_first(guide_menu)
 		return
@@ -1418,7 +1547,8 @@ func finish(success: bool) -> void:
 	for entry: String in model.log: v.add_child(paragraph("• "+entry,15))
 	v.add_child(paragraph("Science %d + crew integrity %d + shelter decision %d + reserves %d + budget/mass efficiency %d. Exploration and research points continue to accumulate.\nTrade-off: %s" % [model.science,int(model.integrity*0.5),20 if model.transit_safe else 0,int((model.oxygen+model.battery)*0.05),model.efficiency_score(),str(Model.LOADOUTS[model.loadout].detail)],16,MINT))
 	v.add_child(action("NASA SOURCES & MODEL LIMITS",func() -> void: source_return = "debrief"; sources()))
-	v.add_child(action("PLAN ANOTHER EXPEDITION",planning,true)); v.add_child(action("TITLE SCREEN",title_screen)); focus_first(v)
+	v.add_child(action("RETURN TO THE EARTH LAB / NEXT EXPEDITION",enter_lab,true))
+	v.add_child(action("QUICK PLAN / SKIP THE LAB",planning)); v.add_child(action("TITLE SCREEN",title_screen)); focus_first(v)
 
 func pause_screen() -> void:
 	var v := menu(700); v.add_child(text("MISSION PAUSED",14,MINT)); v.add_child(text("Take a breath.",40))
@@ -1436,6 +1566,8 @@ func pause_screen() -> void:
 	var q := OptionButton.new(); q.add_item("Performance / no sun shadows"); q.add_item("Balanced / 2× MSAA"); q.add_item("High / 4× MSAA"); q.selected = quality
 	q.item_selected.connect(func(i: int) -> void:
 		quality = i; get_viewport().msaa_3d = Viewport.MSAA_DISABLED if i == 0 else (Viewport.MSAA_2X if i == 1 else Viewport.MSAA_4X)
+		Gfx.grade(world.environment_resource,i); Gfx.viewport_quality(get_viewport(),i)
+		if not testing and capture_mode=="" and not isolated_demo: Gfx.store_quality(i)
 		for child: Node in world.get_children():
 			if child is DirectionalLight3D: child.shadow_enabled = i > 0)
 	v.add_child(q)
@@ -1584,12 +1716,14 @@ func build_orbit() -> void:
 	var star_field := MultiMeshInstance3D.new(); star_field.multimesh = stars; star_field.material_override = glow; orbital_stage.add_child(star_field)
 
 func checkpoint() -> bool:
+	if isolated_demo: return true
 	if guided: return true
 	if testing or capture_mode != "": return true
 	var d: Dictionary = model.snapshot(); d.position = [player.position.x,player.position.y,player.position.z]
 	d.world_seed = world.world_seed; d.generator_version = 4; d.visited_regions = visited_regions
 	d.campaign_id = campaign.id; d.expedition_number = campaign.expedition_number-(1 if model.phase=="RETURNED" else 0); d.field = field.snapshot(); d.ropes = traversal.snapshot()
 	d.outpost = outpost.snapshot()
+	d.hazards = hazards.snapshot(); d.jet_fuel = player.jet_fuel
 	d.frontier = stream.snapshot(); var logical_p: Vector3 = stream.logical(player.position); d.position = [logical_p.x,logical_p.y,logical_p.z]
 	d.yaw = player.camera_yaw; d.pitch = player.camera_pitch
 	var f := FileAccess.open(SAVE+".tmp",FileAccess.WRITE)
@@ -1631,6 +1765,7 @@ func load_checkpoint() -> void:
 			player.position = stream.local(Vector3(x,floor_y+.2,z))
 			stream.ensure_near(player.position,true)
 		outpost.restore(d.get("outpost",{})); field.restore(d.get("field",{})); traversal.restore(d.get("ropes",{}))
+		hazards.reset(saved_seed); hazards.restore(d.get("hazards",{})); player.jet_fuel = clampf(float(d.get("jet_fuel",100)),0,100)
 		player.camera_yaw = float(d.get("yaw",0)); player.camera_pitch = clampf(float(d.get("pitch",-0.2)),-0.85,0.45)
 		if model.phase == "RETURNED" or model.phase == "FAILED": finish(model.phase == "RETURNED")
 		else: resume_surface(); toast("CHECKPOINT RESTORED")
@@ -1726,3 +1861,6 @@ func integration_test() -> void:
 	for e: String in errors: push_error(e)
 	print("EXPEDITION INTEGRATION: ","PASS" if errors.is_empty() else "FAIL"," / seeded world, 40 sites, NASA profiles, traversal tools, architectures, resources, save, collision, movement, scanning, menus, return")
 	get_tree().quit(0 if errors.is_empty() else 1)
+
+func _exit_tree() -> void:
+	Gfx.release_cache()

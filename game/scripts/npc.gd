@@ -7,10 +7,15 @@ var display_name := "CREW"
 var speed := 1.25
 var worker: Node3D
 var paused := 0.0
+var line := ""
+var tag: Label3D
+var stalled := 0.0
+var last_position := Vector3.ZERO
 
-func setup(person_name: String, job: String, points: Array, color: Color) -> void:
+func setup(person_name: String, job: String, points: Array, color: Color, tip := "") -> void:
 	display_name = person_name
 	role = job
+	line = tip
 	for point: Vector3 in points: route.append(point)
 	position = route[0]
 	var shape := CapsuleShape3D.new()
@@ -22,7 +27,19 @@ func setup(person_name: String, job: String, points: Array, color: Color) -> voi
 	add_child(collision)
 	worker = Humanoid.new()
 	add_child(worker)
-	worker.build(color, Color("f4bb64"), job.begins_with("EVA"), abs(person_name.hash()) % 4, false)
+	worker.build(color, Color("f4bb64"), job.begins_with("EVA"), abs(person_name.hash()) % 4, false, job)
+	if not job.begins_with("EVA"):
+		tag = Label3D.new()
+		tag.text = person_name + "\n" + job
+		tag.font_size = 26
+		tag.pixel_size = 0.0022
+		tag.position.y = 2.12
+		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		tag.modulate = Color("d9ffff")
+		tag.outline_size = 8
+		tag.outline_modulate = Color(0.02, 0.08, 0.1)
+		tag.hide()
+		add_child(tag)
 
 func _physics_process(delta: float) -> void:
 	if route.is_empty(): return
@@ -36,7 +53,11 @@ func _physics_process(delta: float) -> void:
 	var target := route[route_index]
 	var flat := target - position
 	flat.y = 0
-	if flat.length() < 0.45:
+	# A blocked walker gives up on the waypoint instead of marching into furniture.
+	stalled = stalled + delta if position.distance_to(last_position) < delta * 0.3 else 0.0
+	last_position = position
+	if flat.length() < 0.45 or stalled > 1.5:
+		stalled = 0.0
 		route_index = (route_index + 1) % route.size()
 		paused = 1.0 + fmod(float(route_index) * 0.7, 2.5)
 		return
